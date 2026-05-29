@@ -9,6 +9,8 @@ import { GlowCard } from "@/components/ui/GlowCard";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
+import { handleSignOut } from "@/app/auth/signin/actions";
+
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
@@ -51,10 +53,18 @@ export default async function DashboardPage() {
             TRAVIQ <span className="text-blue-500">AI</span>
           </span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <div className="bg-white/[0.04] border border-white/10 px-4 py-1.5 rounded-full text-white font-medium text-xs backdrop-blur-md">
             {session.user.name?.split(" ")[0]}
           </div>
+          <form action={handleSignOut}>
+            <button 
+              type="submit"
+              className="px-3.5 py-1.5 rounded-full border border-rose-500/20 bg-rose-500/5 hover:bg-rose-500/10 text-rose-400 font-bold text-xs hover:border-rose-500/30 transition-all cursor-pointer"
+            >
+              Sign Out
+            </button>
+          </form>
         </div>
       </nav>
 

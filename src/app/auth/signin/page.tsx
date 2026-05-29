@@ -1,6 +1,6 @@
 // src/app/auth/signin/page.tsx
 "use client";
-import { signIn } from "next-auth/react";
+import { handleDeveloperSignIn } from "./actions";
 import Link from "next/link";
 import { GlowCard } from "@/components/ui/GlowCard";
 import { MagneticButton } from "@/components/ui/MagneticButton";
@@ -20,7 +20,13 @@ export default function SignInPage() {
         <p className="text-[13px] text-gray-400 font-medium mb-10">Your AI-Powered Travel CFO</p>
 
         <MagneticButton
-          onClick={() => signIn("credentials", { email: "test@example.com", callbackUrl: "/dashboard" })}
+          onClick={async () => {
+            try {
+              await handleDeveloperSignIn();
+            } catch (e) {
+              // Server actions throw redirects which are caught by the Next.js router
+            }
+          }}
           variant="primary"
           size="lg"
           className="w-full"
