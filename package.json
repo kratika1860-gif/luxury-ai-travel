@@ -1,0 +1,43 @@
+{
+  "name": "traviq-ai",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^0.0.40",
+    "@anthropic-ai/sdk": "^0.98.0",
+    "@auth/prisma-adapter": "^2.11.2",
+    "@prisma/client": "^5.16.1",
+    "@react-three/drei": "^9.102.6",
+    "@react-three/fiber": "^8.17.7",
+    "ai": "^3.3.6",
+    "chart.js": "^4.4.3",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^12.40.0",
+    "gsap": "^3.15.0",
+    "lucide-react": "^0.414.0",
+    "next": "14.2.5",
+    "next-auth": "^5.0.0-beta.19",
+    "prisma": "^5.16.1",
+    "react": "^18",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18",
+    "tailwind-merge": "^2.4.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
