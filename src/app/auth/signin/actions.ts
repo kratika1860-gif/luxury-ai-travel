@@ -1,10 +1,10 @@
 "use server";
 import { signIn, signOut } from "@/lib/auth";
 
-export async function handleDeveloperSignIn() {
+export async function handleDeveloperSignIn(email: string) {
   try {
     await signIn("credentials", { 
-      email: "test@example.com", 
+      email: email.trim(), 
       redirectTo: "/dashboard" 
     });
   } catch (error: any) {

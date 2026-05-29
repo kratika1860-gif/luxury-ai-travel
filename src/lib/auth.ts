@@ -11,12 +11,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         const email = (credentials?.email as string) || "test@example.com";
-        // Return a simple user object — no database needed
+        
+        // Dynamic import to prevent next-auth init circular dependencies
+        const { prisma } = await import("@/lib/prisma");
+
+        const user = await prisma.user.upsert({
+          where: { email },
+          update: {},
+          create: {
+            email,
+            name: email.split("@")[0].charAt(0).toUpperCase() + email.split("@")[0].slice(1),
+            image: `https://avatar.iran.liara.run/public/${Math.floor(Math.random() * 99) + 1}`,
+          },
+        });
+
         return {
-          id: email.replace(/[^a-zA-Z0-9]/g, "-"),
-          email,
-          name: "Demo User",
-          image: "https://avatar.iran.liara.run/public/32",
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
         };
       },
     }),
