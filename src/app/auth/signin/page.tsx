@@ -30,11 +30,23 @@ export default function SignInPage() {
     try {
       await handleDeveloperSignIn(targetEmail);
     } catch (e: any) {
-      // Server actions throw NEXT_REDIRECT to perform navigation, which is caught by Next.js router
-      if (e.message !== "NEXT_REDIRECT") {
-        setError("Something went wrong. Please try again.");
-        setLoading(false);
+      // In Next.js, Server Action redirects throw an error object to perform client-side navigation.
+      // If the error message, type, or digest includes 'NEXT_REDIRECT' or 'redirect', it is a normal redirect.
+      const isRedirect = 
+        e.message?.includes("NEXT_REDIRECT") || 
+        e.message?.includes("redirect") || 
+        e.digest?.includes("NEXT_REDIRECT") ||
+        String(e).includes("NEXT_REDIRECT") ||
+        String(e).includes("redirect");
+
+      if (isRedirect) {
+        // Let Next.js handle the routing!
+        return;
       }
+      
+      console.error("Auth action error:", e);
+      setError("Authentication failed. Please verify your database connection.");
+      setLoading(false);
     }
   }
 
