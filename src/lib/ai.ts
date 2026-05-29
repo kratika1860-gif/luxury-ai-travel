@@ -1074,3 +1074,126 @@ function generateFallbackAnalysis(
     }
   };
 }
+
+export async function getAITravelChatResponse(params: {
+  destination: string;
+  travelStyle: string;
+  budget: number;
+  message: string;
+  history?: Array<{ role: "user" | "assistant"; content: string }>;
+  aiAnalysis?: string;
+}): Promise<string> {
+  const msg = params.message.toLowerCase();
+  
+  // Parse analysis JSON if available for high-fidelity offline/online matching
+  let parsedAnalysis: any = null;
+  if (params.aiAnalysis) {
+    try {
+      parsedAnalysis = JSON.parse(params.aiAnalysis);
+    } catch (e) {
+      console.warn("Failed to parse aiAnalysis context:", e);
+    }
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey || apiKey === "your-key-here" || apiKey === "" || apiKey.includes("...")) {
+    // ═══ EXTREMELY ADVANCED OFFLINE FALLBACK PARSING ENGINE ═══
+    if (parsedAnalysis) {
+      if (msg.includes("hotel") || msg.includes("stay") || msg.includes("accommodation") || msg.includes("room")) {
+        if (parsedAnalysis.hotels && parsedAnalysis.hotels.length > 0) {
+          const hotelLines = parsedAnalysis.hotels.map((h: any, i: number) => {
+            return `🏨 **${h.name}** (${h.rating}⭐, ${h.type || "Stay"})\n*   *Cost:* ₹${h.pricePerNight.toLocaleString()}/night\n*   *Vibe:* ${h.neighborhoodVibe || "Prime local area"}\n*   *Why Book:* ${h.suitability}\n*   *Eco Badge:* ${h.sustainability || "Standard certification"}\n*   *Perks:* ${(h.benefits || h.amenities || []).join(", ")}`;
+          }).join("\n\n");
+          return `✨ **Recommended Stays for your ${params.travelStyle} trip to ${params.destination}:**\n\n${hotelLines}\n\n*Would you like me to recommend transit routes to get to any of these hotels?*`;
+        }
+      }
+
+      if (msg.includes("flight") || msg.includes("airline") || msg.includes("plane") || msg.includes("ticket") || msg.includes("luggage") || msg.includes("bag")) {
+        if (parsedAnalysis.flightStrategy) {
+          const fs = parsedAnalysis.flightStrategy;
+          return `✈️ **Sovereign Flight Strategy for your trip:**\n\n*   **Cheapest Days:** ${fs.cheapestDays}\n*   **Best Carriers:** ${(fs.bestAirlines || []).join(", ")}\n*   **Layover Secret:** ${fs.layoverTip}\n*   **Ideal Seating:** ${fs.seatRecommendation}\n*   **Baggage Alert:** ${fs.baggageWarning}\n\n*Tip: Check these details in your Flight Strategy block inside the Overview tab!*`;
+        }
+      }
+
+      if (msg.includes("price") || msg.includes("cost") || msg.includes("expensive") || msg.includes("cheap") || msg.includes("market") || msg.includes("trends")) {
+        if (parsedAnalysis.pricingIntel) {
+          const pi = parsedAnalysis.pricingIntel;
+          return `📊 **Market Pricing Intelligence for ${params.destination}:**\n\n*   **Year-over-Year:** ${pi.vsLastYear}\n*   **Booking Window:** ${pi.bookingWindow}\n*   **Alternative Option:** ${pi.alternativeDestination}\n*   **Peak Avoidance Tip:** ${pi.peakAvoidance}`;
+        }
+      }
+
+      if (msg.includes("visa") || msg.includes("entry") || msg.includes("passport") || msg.includes("document")) {
+        return `🛂 **Official entry requirements for Indian passport holders traveling to ${params.destination}:**\n\n*   *Visa Type:* The system has mapped this as highly specific to the country's immigration regulations.\n*   *Important Tip:* Always carry a passport valid for at least 6 months, return flight tickets, hotel vouchers, and an active international credit card (like Scapia or Niyo Global).`;
+      }
+
+      // Check daily itinerary details
+      if (msg.includes("itinerary") || msg.includes("day") || msg.includes("plan") || msg.includes("activity") || msg.includes("schedule")) {
+        // Try matching a day (e.g. "day 2", "day 3")
+        const match = msg.match(/day\s*(\d+)/);
+        if (match && parsedAnalysis.itinerary) {
+          const dayNum = parseInt(match[1]);
+          const dayData = parsedAnalysis.itinerary.find((d: any) => d.day === dayNum);
+          if (dayData) {
+            const activities = dayData.activities.map((a: string) => `    *   ${a}`).join("\n");
+            const meals = (dayData.mealSuggestions || []).map((m: any) => `    *   **${m.meal}:** ${m.place} (₹${m.cost.toLocaleString()}) — *${m.tip}*`).join("\n");
+            const hacks = (dayData.localHacks || []).map((h: string) => `    *   ${h}`).join("\n");
+            return `📅 **Day ${dayData.day}: ${dayData.title}**\n\n📍 **Core Activities:**\n${activities}\n\n🍽️ **Meal Concierge:**\n${meals || "    *   No specific meals logged for this day."}\n\n🎯 **Insider hacks for this day:**\n${hacks || "    *   Walk or use standard transit apps."}\n\n*Estimated daily spend: ₹${dayData.estimatedCost.toLocaleString()} INR.*`;
+          }
+        }
+      }
+    }
+
+    // Default conversational fallbacks tailored to keywords
+    if (msg.includes("rain") || msg.includes("weather") || msg.includes("storm") || msg.includes("season")) {
+      return `🌧️ If you face unfavorable weather conditions in ${params.destination}, I highly recommend shifting outdoor activities to indoor museum complexes (e.g. teamLab Planets/Mori Art Museum if in Tokyo, or Centre Pompidou/Louvre if in Paris). Carry an umbrella purchased from a local convenience store (e.g., 7-Eleven or Lawson for about ¥500/€5) rather than high-priced hotel alternatives.`;
+    }
+    if (msg.includes("food") || msg.includes("eat") || msg.includes("restaurant") || msg.includes("dinner")) {
+      return `🍽️ For dining in ${params.destination} under a ${params.travelStyle} budget, explore local market alleys rather than main tourist streets. If you're in Japan, target local Izakayas, standing sushi bars, or basement food halls (depachika) in major stations around 8 PM when they slash prices by 30-50%. If in Europe, look for set lunch menus (formule midi) which save up to 40% compared to dinner.`;
+    }
+    if (msg.includes("train") || msg.includes("transit") || msg.includes("metro") || msg.includes("transport") || msg.includes("bus")) {
+      return `🚇 For transit around ${params.destination}, avoid individual single-ride tickets. Opt for localized tourist transit passes (like the Tokyo Subway 72-Hour Pass for ¥1,500, or Navigo Easy card in Paris). They cut transit overhead costs by almost 35% and offer absolute ease of use!`;
+    }
+    return `👋 Alola! I am your TRAVIQ AI Concierge. I am fully configured with your trip to **${params.destination}** at a **${params.travelStyle}** budget level of **₹${params.budget.toLocaleString()} INR**. Ask me anything about transit lines, restaurant recommendations, rainy-day alternatives, packing lists, or local hacks!`;
+  }
+
+  try {
+    const formattedHistory = params.history?.map(h => ({
+      role: h.role === "user" ? ("user" as const) : ("assistant" as const),
+      content: h.content
+    })) || [];
+
+    const response = await getAnthropicClient().messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 600,
+      messages: [
+        ...formattedHistory,
+        {
+          role: "user",
+          content: `You are the ultimate digital luxury travel concierge embedded inside the TRAVIQ Travel OS dashboard.
+Current Trip Parameters:
+- Destination: ${params.destination}
+- Travel Persona/Style: ${params.travelStyle}
+- Budget: ₹${params.budget} INR
+
+Here is the exact AI Analysis, hotels, daily itinerary, and flight strategies currently displayed on the user's dashboard screen:
+${params.aiAnalysis || "No custom dashboard context loaded yet."}
+
+Your personality is highly efficient, sophisticated, and realistic. Use the exact hotel names, flight strategies, pricing parameters, and itineraries listed in the context above to solve the user's doubts. 
+
+If they ask about flight tickets or luggage, reference the flightStrategy and pricingIntel. 
+If they ask about hotels, compare the amenities, vibes, check-ins, or loyalty programs from the hotels list. 
+If they ask about daily schedules or dining, parse the exact day data from the itinerary block.
+
+Keep your replies structured, highly granular, clear, and actionable. Include concrete numbers or app names.
+
+User's Question: "${params.message}"`
+        }
+      ]
+    });
+    return response.content[0].type === "text" ? response.content[0].text : "";
+  } catch (error) {
+    console.error("Chat API error:", error);
+    return `Alola! I'm here to assist you on your trip to ${params.destination}. Feel free to ask about hotels, meals, transport, or hacks!`;
+  }
+}
+

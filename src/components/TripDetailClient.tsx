@@ -43,6 +43,51 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
   const [hotelSort, setHotelSort] = useState<"price_asc" | "rating_desc">("rating_desc");
   const [expandedHotels, setExpandedHotels] = useState<number[]>([]);
 
+  // AI Concierge Chatbot State
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<Array<{ sender: "user" | "bot"; text: string }>>([
+    { sender: "bot", text: `👋 Alola! I am your TRAVIQ AI Concierge. I am fully configured with your trip to ${trip.destination}. Ask me anything about transit lines, restaurant recommendations, rainy-day alternatives, packing lists, or local hacks!` }
+  ]);
+  const [chatLoading, setChatLoading] = useState(false);
+
+  async function handleSendChatMessage(e: React.FormEvent) {
+    e.preventDefault();
+    if (!chatInput.trim() || chatLoading) return;
+
+    const userText = chatInput.trim();
+    setChatInput("");
+    setChatMessages((prev) => [...prev, { sender: "user", text: userText }]);
+    setChatLoading(true);
+
+    try {
+      const history = chatMessages
+        .slice(-6)
+        .map(m => ({
+          role: m.sender === "user" ? ("user" as const) : ("assistant" as const),
+          content: m.text
+        }));
+
+      const res = await fetch(`/api/trips/${trip.id}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userText, history }),
+      });
+
+      const data = await res.json();
+      if (data.reply) {
+        setChatMessages((prev) => [...prev, { sender: "bot", text: data.reply }]);
+      } else {
+        setChatMessages((prev) => [...prev, { sender: "bot", text: "I ran into a small connection hiccup. Feel free to ask me again!" }]);
+      }
+    } catch (err) {
+      console.error(err);
+      setChatMessages((prev) => [...prev, { sender: "bot", text: "Connection error. Please check your network and try again." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  }
+
   function toggleDay(dayNumber: number) {
     setOpenDays(prev => prev.includes(dayNumber) ? prev.filter(d => d !== dayNumber) : [...prev, dayNumber]);
   }
@@ -1213,6 +1258,87 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
           onAdded={() => { setShowAddExpense(false); window.location.reload(); }}
         />
       )}
+
+      {/* ═══ FLOATING AI TRAVEL CONCIERGE CHATBOT ═══ */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        {/* Chat window panel */}
+        {chatOpen && (
+          <GlowCard 
+            glowColor="rgba(6,182,212,0.15)" 
+            className="w-[340px] sm:w-[380px] h-[480px] mb-4 flex flex-col overflow-hidden border border-cyan-500/20 bg-black/90 shadow-[0_0_30px_rgba(6,182,212,0.15)] animate-float"
+          >
+            {/* Header */}
+            <div className="px-4 py-3 bg-gradient-to-r from-cyan-950/20 via-black to-blue-950/20 border-b border-white/[0.06] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]"></div>
+                <div>
+                  <span className="text-[12px] font-black uppercase tracking-widest text-cyan-300">AI Concierge</span>
+                  <p className="text-[10px] text-gray-400 font-medium">Equipped with {trip.destination} intelligence</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setChatOpen(false)}
+                className="text-gray-400 hover:text-white text-xs font-bold w-6 h-6 rounded-full bg-white/[0.03] flex items-center justify-center transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Message list area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin">
+              {chatMessages.map((m, idx) => (
+                <div key={idx} className={`flex ${m.sender === "user" ? "justify-end" : "justify-start"}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-[12.5px] leading-relaxed shadow-sm ${
+                    m.sender === "user" 
+                      ? "bg-blue-600 text-white rounded-tr-none font-medium" 
+                      : "bg-white/[0.03] border border-white/[0.06] text-gray-250 rounded-tl-none font-medium"
+                  }`}>
+                    {m.text}
+                  </div>
+                </div>
+              ))}
+              {chatLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/[0.02] border border-white/[0.04] rounded-2xl rounded-tl-none px-4 py-3 text-xs text-cyan-300/80 flex items-center gap-2 font-semibold">
+                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.2s]"></div>
+                    <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-bounce [animation-delay:0.4s]"></div>
+                    <span>CFO Concierge is thinking...</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Chat Input form */}
+            <form onSubmit={handleSendChatMessage} className="p-3 border-t border-white/[0.06] bg-black/60 flex items-center gap-2">
+              <input 
+                type="text"
+                placeholder="Ask me transit lines, hotels, rainy-day plans..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                className="flex-1 text-[12.5px] rounded-xl border-white/10 bg-white/[0.03] text-white placeholder-gray-500 focus:ring-cyan-500 focus:border-cyan-500 py-2 px-3"
+              />
+              <button 
+                type="submit"
+                disabled={chatLoading || !chatInput.trim()}
+                className="bg-cyan-600 hover:bg-cyan-500 disabled:bg-white/[0.02] disabled:text-gray-500 text-white font-bold text-[12.5px] px-3.5 py-2 rounded-xl transition-all shadow-md flex items-center justify-center flex-shrink-0"
+              >
+                Send
+              </button>
+            </form>
+          </GlowCard>
+        )}
+
+        {/* Floating Bubble Button */}
+        <button 
+          onClick={() => setChatOpen(!chatOpen)}
+          className="w-14 h-14 rounded-full bg-gradient-to-tr from-cyan-600 to-blue-600 text-white flex items-center justify-center shadow-[0_0_20px_rgba(6,182,212,0.4)] border border-cyan-400/20 hover:scale-105 transition-transform group relative"
+        >
+          <span className="text-xl">🤖</span>
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-[#020204] animate-pulse"></span>
+        </button>
+      </div>
+
     </div>
   );
 }
