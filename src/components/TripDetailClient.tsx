@@ -43,6 +43,7 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
   // Hotel Directory State
   const [hotelSort, setHotelSort] = useState<"price_asc" | "rating_desc">("rating_desc");
   const [expandedHotels, setExpandedHotels] = useState<number[]>([]);
+  const [calcAmount, setCalcAmount] = useState<number>(10000);
 
   // AI Concierge Chatbot State
   const [chatOpen, setChatOpen] = useState(false);
@@ -1469,198 +1470,418 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
 
         {/* VISA TAB */}
         {activeTab === "visa" && (
-          <GlowCard glowColor={visaInfo.required ? "rgba(244,63,94,0.1)" : "rgba(16,185,129,0.1)"} className="overflow-hidden">
-            <div className={`px-6 py-8 border-b ${
-              visaInfo.required 
-                ? "bg-rose-950/10 border-rose-500/20 text-rose-400" 
-                : "bg-emerald-950/10 border-emerald-500/20 text-emerald-400"
-            }`}>
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div>
-                  <h2 className="text-2xl font-black tracking-tight text-white">Visa & Entry Guide</h2>
-                  <p className="text-sm text-gray-400 mt-1">Official requirements for Indian Passport Holders traveling to {trip.destination}</p>
-                </div>
-                <div>
-                  <span className={`px-4 py-1.5 text-xs font-black rounded-full uppercase tracking-widest shadow-[0_0_12px_rgba(0,0,0,0.5)] ${
-                    visaInfo.required ? "bg-rose-600 text-white" : "bg-emerald-600 text-white"
-                  }`}>
-                    {visaInfo.required ? "Visa Required" : "Visa Free Entry"}
-                  </span>
+          <div className="space-y-6">
+            <GlowCard glowColor={visaInfo.required ? "rgba(244,63,94,0.1)" : "rgba(16,185,129,0.1)"} className="overflow-hidden">
+              <div className={`px-6 py-8 border-b ${
+                visaInfo.required 
+                  ? "bg-rose-950/10 border-rose-500/20 text-rose-400" 
+                  : "bg-emerald-950/10 border-emerald-500/20 text-emerald-400"
+              }`}>
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                  <div>
+                    <h2 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
+                      <span>🛂</span> Visa & Entry Guide
+                    </h2>
+                    <p className="text-sm text-gray-400 mt-1">Official entry intelligence & compliance for Indian Passport Holders traveling to {trip.destination}</p>
+                  </div>
+                  <div>
+                    <span className={`px-4 py-2 text-xs font-black rounded-full uppercase tracking-widest shadow-[0_0_12px_rgba(0,0,0,0.5)] ${
+                      visaInfo.required ? "bg-rose-600 text-white shadow-rose-500/20" : "bg-emerald-600 text-white shadow-emerald-500/20"
+                    }`}>
+                      {visaInfo.required ? "Visa Required" : "Visa Free Entry"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-            
-            <div className="p-6">
-              {/* Premium Stat Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-400 flex items-center justify-center text-[11px]">🛂</span>
-                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Visa Type</span>
+              
+              <div className="p-6">
+                {/* Premium Stat Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 shadow-sm hover:border-white/10 transition-colors">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-400 flex items-center justify-center text-[11px]">🛂</span>
+                      <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Visa Type</span>
+                    </div>
+                    <div className="text-lg font-black text-white capitalize">{visaInfo.type.replace("-", " ")}</div>
                   </div>
-                  <div className="text-lg font-black text-white capitalize">{visaInfo.type.replace("-", " ")}</div>
-                </div>
-                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[11px]">💸</span>
-                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Est. Cost</span>
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 shadow-sm hover:border-white/10 transition-colors">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[11px]">💸</span>
+                      <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Est. Cost</span>
+                    </div>
+                    <div className="text-lg font-black text-white">{visaInfo.costINR === 0 ? "Free" : `₹${visaInfo.costINR.toLocaleString()}`}</div>
                   </div>
-                  <div className="text-lg font-black text-white">{visaInfo.costINR === 0 ? "Free" : `₹${visaInfo.costINR.toLocaleString()}`}</div>
-                </div>
-                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-400 flex items-center justify-center text-[11px]">⏱️</span>
-                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Processing</span>
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 shadow-sm hover:border-white/10 transition-colors">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-400 flex items-center justify-center text-[11px]">⏱️</span>
+                      <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Processing</span>
+                    </div>
+                    <div className="text-lg font-black text-white">{visaInfo.processingDays}</div>
                   </div>
-                  <div className="text-lg font-black text-white">{visaInfo.processingDays}</div>
-                </div>
-                <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-md bg-amber-500/10 text-amber-400 flex items-center justify-center text-[11px]">📅</span>
-                    <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Max Stay</span>
-                  </div>
-                  <div className="text-lg font-black text-white">{visaInfo.maxStay}</div>
-                </div>
-              </div>
-
-              {/* Action Banner */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-8 items-start sm:items-center justify-between p-5 bg-gradient-to-r from-blue-950/10 to-indigo-950/10 border border-blue-500/15 rounded-2xl">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0 mt-0.5 border border-blue-500/20">
-                    <span className="text-blue-400 font-bold text-sm">i</span>
-                  </div>
-                  <p className="text-sm font-medium text-gray-300 leading-relaxed max-w-2xl">{visaInfo.notes}</p>
-                </div>
-                {visaInfo.applyUrl && (
-                  <a href={visaInfo.applyUrl} target="_blank" rel="noreferrer" className="flex-shrink-0">
-                    <MagneticButton variant="primary" size="sm">
-                      Official Portal
-                      <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" className="ml-1.5"><path d="M5 11L11 5M11 5H6M11 5V10" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </MagneticButton>
-                  </a>
-                )}
-              </div>
-
-              {/* Documents & Tips Checklist */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white/[0.01] p-6 rounded-2xl border border-white/[0.05]">
-                  <h4 className="text-sm font-black text-white mb-4 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-[12px] border border-indigo-500/20">📄</div>
-                    Required Documents Checklist
-                  </h4>
-                  <div className="space-y-3">
-                    {visaInfo.documents.map((doc, idx) => (
-                      <label key={idx} className="flex items-start gap-3 p-3 bg-white/[0.01] border border-white/[0.06] rounded-xl cursor-pointer hover:border-blue-500/30 hover:bg-white/[0.03] transition-all shadow-sm">
-                        <input type="checkbox" className="mt-1 w-4 h-4 text-blue-500 bg-white/[0.05] border-white/10 rounded focus:ring-blue-500/30" />
-                        <span className="text-[13px] font-medium text-gray-300 leading-snug select-none">{doc}</span>
-                      </label>
-                    ))}
+                  <div className="bg-white/[0.02] border border-white/[0.06] rounded-2xl p-4 shadow-sm hover:border-white/10 transition-colors">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="w-6 h-6 rounded-md bg-amber-500/10 text-amber-400 flex items-center justify-center text-[11px]">📅</span>
+                      <span className="text-[11px] text-gray-400 font-bold uppercase tracking-wider">Max Stay</span>
+                    </div>
+                    <div className="text-lg font-black text-white">{visaInfo.maxStay}</div>
                   </div>
                 </div>
 
-                <div className="bg-white/[0.01] p-6 rounded-2xl border border-white/[0.05]">
-                  <h4 className="text-sm font-black text-white mb-4 flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-[12px] border border-amber-500/20">💡</div>
-                    Expert Insider Tips
-                  </h4>
-                  <div className="space-y-3">
-                    {visaInfo.tips.map((tip, idx) => {
-                      const parts = tip.split(" — ");
-                      const title = parts[0];
-                      const desc = parts.slice(1).join(" — ");
-                      return (
-                        <div key={idx} className="flex items-start gap-3 p-3 bg-white/[0.01] border border-white/[0.06] rounded-xl shadow-sm">
-                          <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l3 3 7-7" /></svg>
+                {/* Passport Power Indicator & Application Progress Timeline */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                  {/* Passport Strength Card */}
+                  <div className="bg-gradient-to-br from-indigo-950/10 to-[#0c0c12] border border-white/[0.06] rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[15px]">🇮🇳</span>
+                        <span className="text-[11px] font-black uppercase tracking-widest text-indigo-400">Indian Passport Strength</span>
+                      </div>
+                      <h4 className="text-[15px] font-black text-white leading-snug mb-1">Global Mobility Rank</h4>
+                      <p className="text-[12px] text-gray-400 mb-4">Ranked #80 globally in Henley Passport Index</p>
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex justify-between text-[11px] font-bold text-gray-300 mb-1">
+                            <span>Visa-Free Countries</span>
+                            <span>62 / 195</span>
                           </div>
-                          <div>
-                            <span className="text-[13px] font-bold text-white block mb-0.5">{title}</span>
-                            {desc && <span className="text-[12px] font-medium text-gray-400 leading-relaxed block">{desc}</span>}
+                          <div className="w-full h-1.5 bg-white/[0.04] rounded-full overflow-hidden">
+                            <div className="h-full bg-indigo-500 rounded-full" style={{ width: "32%" }}></div>
                           </div>
                         </div>
-                      );
-                    })}
+                        <div>
+                          <div className="flex justify-between text-[11px] font-bold text-gray-300 mb-1">
+                            <span>Destination Eligibility</span>
+                            <span className={visaInfo.required ? "text-rose-400" : "text-emerald-400"}>
+                              {visaInfo.required ? "Requires Advance Application" : "Direct Entry / VoA"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 pt-4 border-t border-white/[0.04] text-[11.5px] text-gray-400 leading-relaxed italic">
+                      💡 <strong>Passport Hack:</strong> Ensure your passport is valid for at least 6 months beyond your departure date and contains at least 2 consecutive blank visa pages.
+                    </div>
+                  </div>
+
+                  {/* interactive Milestone Tracker */}
+                  <div className="bg-[#0b0b10] border border-white/[0.06] rounded-2xl p-5 lg:col-span-2">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-[15px]">📅</span>
+                      <span className="text-[11px] font-black uppercase tracking-widest text-blue-400">Application Milestones Tracker</span>
+                    </div>
+                    
+                    <div className="relative border-l border-white/10 ml-3 pl-6 space-y-4">
+                      <div className="relative">
+                        <div className="absolute -left-[30px] top-0 w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center text-[8px] font-black text-black">✓</div>
+                        <h5 className="text-[13px] font-bold text-white">Day -60: VFS Slot Booking & Financial Proofs</h5>
+                        <p className="text-[11.5px] text-gray-400 leading-relaxed mt-0.5">
+                          Secure VFS slots early (especially for Schengen/Japan during summer). Begin maintaining a stable bank balance of ₹2.5 Lakh+ without sudden heavy cash transfers.
+                        </p>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute -left-[30px] top-0 w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center text-[8px] font-black text-white">2</div>
+                        <h5 className="text-[13px] font-bold text-white">Day -45: Gather Documents & NOCs</h5>
+                        <p className="text-[11.5px] text-gray-400 leading-relaxed mt-0.5">
+                          Collect salary slips, ITRs, employer-signed NOC, refundable flight reservations, and purchase Schengen/international medical insurance.
+                        </p>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute -left-[30px] top-0 w-4 h-4 rounded-full bg-blue-500/30 border border-white/20 flex items-center justify-center text-[8px] font-black text-gray-400">3</div>
+                        <h5 className="text-[13px] font-bold text-white">Day -30: Submission & Biometrics</h5>
+                        <p className="text-[11.5px] text-gray-400 leading-relaxed mt-0.5">
+                          Submit your physical passport, application forms, photographs matching exact dimensions (white background, matte finish), and record your biometrics at the VFS Center.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Banner */}
+                <div className="flex flex-col sm:flex-row gap-4 mb-8 items-start sm:items-center justify-between p-5 bg-gradient-to-r from-blue-950/10 to-indigo-950/10 border border-blue-500/15 rounded-2xl">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0 mt-0.5 border border-blue-500/20">
+                      <span className="text-blue-400 font-bold text-sm">i</span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-300 leading-relaxed max-w-2xl">{visaInfo.notes}</p>
+                  </div>
+                  {visaInfo.applyUrl && (
+                    <a href={visaInfo.applyUrl} target="_blank" rel="noreferrer" className="flex-shrink-0">
+                      <MagneticButton variant="primary" size="sm">
+                        Official VFS Portal
+                        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" className="ml-1.5"><path d="M5 11L11 5M11 5H6M11 5V10" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </MagneticButton>
+                    </a>
+                  )}
+                </div>
+
+                {/* Documents & Tips Checklist */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="bg-white/[0.01] p-6 rounded-2xl border border-white/[0.05]">
+                    <h4 className="text-sm font-black text-white mb-4 flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-[12px] border border-indigo-500/20">📄</div>
+                      Required Documents Checklist
+                    </h4>
+                    <div className="space-y-3">
+                      {visaInfo.documents.map((doc, idx) => (
+                        <label key={idx} className="flex items-start gap-3 p-3 bg-white/[0.01] border border-white/[0.06] rounded-xl cursor-pointer hover:border-blue-500/30 hover:bg-white/[0.03] transition-all shadow-sm">
+                          <input type="checkbox" className="mt-1 w-4 h-4 text-blue-500 bg-white/[0.05] border-white/10 rounded focus:ring-blue-500/30" />
+                          <span className="text-[13px] font-medium text-gray-300 leading-snug select-none">{doc}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Rejection Shield Card */}
+                    {visaInfo.required && (
+                      <div className="bg-rose-950/10 border border-rose-500/15 p-5 rounded-2xl shadow-[0_0_20px_rgba(244,63,94,0.02)]">
+                        <h4 className="text-[13px] font-black text-rose-400 uppercase tracking-widest flex items-center gap-2 mb-3">
+                          <span className="text-sm">🛡️</span> Rejection Avoidance Shield
+                        </h4>
+                        <ul className="space-y-2 text-[12px] text-gray-300 leading-relaxed font-medium">
+                          <li className="flex items-start gap-2">
+                            <span className="text-rose-400 mt-0.5">•</span>
+                            <span><strong>No Large Sudden Cash Deposits:</strong> Visa officers reject passports if they see a sudden bank transfer right before applying. Funds must be seasoned in your account.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-rose-400 mt-0.5">•</span>
+                            <span><strong>NOC Mismatch:</strong> The company name and salary details on your NOC, salary slips, and bank statement must align perfectly. Mismatches trigger strict rejections.</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-rose-400 mt-0.5">•</span>
+                            <span><strong>Photo Specifications:</strong> VFS rejects photos that have gloss finishes or do not follow specific dimensions (e.g. 45×35mm). Keep glasses off and hair behind ears.</span>
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="bg-white/[0.01] p-6 rounded-2xl border border-white/[0.05]">
+                      <h4 className="text-sm font-black text-white mb-4 flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-[12px] border border-amber-500/20">💡</div>
+                        Expert Insider Tips
+                      </h4>
+                      <div className="space-y-3">
+                        {visaInfo.tips.map((tip, idx) => {
+                          const parts = tip.split(" — ");
+                          const title = parts[0];
+                          const desc = parts.slice(1).join(" — ");
+                          return (
+                            <div key={idx} className="flex items-start gap-3 p-3 bg-white/[0.01] border border-white/[0.06] rounded-xl shadow-sm">
+                              <div className="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8l3 3 7-7" /></svg>
+                              </div>
+                              <div>
+                                <span className="text-[13px] font-bold text-white block mb-0.5">{title}</span>
+                                {desc && <span className="text-[12px] font-medium text-gray-400 leading-relaxed block">{desc}</span>}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </GlowCard>
+            </GlowCard>
+          </div>
         )}
 
         {/* FOREX TAB */}
         {activeTab === "forex" && (
-          <GlowCard glowColor="rgba(6,182,212,0.1)" className="overflow-hidden">
-            <div className="px-6 py-6 border-b border-white/[0.06] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">Forex Optimizer</h2>
-                <p className="text-sm text-gray-400 mt-1">Live exchange comparisons for INR → {toCurrency}</p>
-              </div>
-            </div>
-            
-            <div className="p-6">
-              {analysis?.forexAdvice && (
-                <div className="mb-6 p-4 bg-amber-500/5 border border-amber-500/15 rounded-2xl flex items-start gap-3 shadow-sm text-amber-300">
-                  <span className="text-xl">💡</span>
-                  <p className="text-sm font-medium leading-relaxed">{analysis.forexAdvice}</p>
+          <div className="space-y-6">
+            <GlowCard glowColor="rgba(6,182,212,0.1)" className="overflow-hidden">
+              <div className="px-6 py-6 border-b border-white/[0.06] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                    <span>💱</span> Forex Optimizer & Calculator
+                  </h2>
+                  <p className="text-sm text-gray-400 mt-1">Live exchange rates, calculator comparisons, and dynamic strategies for INR → {toCurrency}</p>
                 </div>
-              )}
+              </div>
               
-              <div className="space-y-4">
-                {forexRates.map((fx, idx) => (
-                  <div
-                    key={fx.provider}
-                    className={`relative overflow-hidden border rounded-2xl transition-all ${
-                      fx.recommended 
-                        ? "border-emerald-500/30 bg-gradient-to-r from-emerald-950/10 to-[#0c0c12]/80 shadow-[0_0_20px_rgba(16,185,129,0.08)]" 
-                        : "border-white/[0.05] bg-[#0c0c12]/80 hover:border-white/10 hover:shadow-sm"
-                    }`}
-                  >
-                    {fx.recommended && (
-                      <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-lg shadow-[0_0_10px_rgba(16,185,129,0.4)]">
-                        Top Pick
+              <div className="p-6">
+                {analysis?.forexAdvice && (
+                  <div className="mb-6 p-4 bg-amber-500/5 border border-amber-500/15 rounded-2xl flex items-start gap-3 shadow-sm text-amber-300">
+                    <span className="text-xl">💡</span>
+                    <p className="text-sm font-medium leading-relaxed">{analysis.forexAdvice}</p>
+                  </div>
+                )}
+
+                {/* Interactive Calculator Cockpit */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                  {/* Live Calculator Widget */}
+                  <div className="bg-gradient-to-br from-cyan-950/15 to-[#0b0b10] border border-cyan-500/15 rounded-2xl p-5 shadow-[0_0_20px_rgba(6,182,212,0.03)] flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[15px]">🧮</span>
+                        <span className="text-[11px] font-black uppercase tracking-widest text-cyan-400">Live Forex Converter</span>
                       </div>
-                    )}
-                    
-                    <div className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg shadow-sm border ${
-                          fx.recommended 
-                            ? "bg-white/[0.02] text-emerald-400 border-emerald-500/25 shadow-[0_0_12px_rgba(16,185,129,0.15)]" 
-                            : "bg-white/[0.01] text-gray-300 border-white/[0.05]"
-                        }`}>
-                          {fx.provider.charAt(0)}
-                        </div>
-                        <div>
-                          <h4 className="text-base font-black text-white flex items-center gap-2">
-                            {fx.provider}
-                            {fx.markup === 0 && <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] uppercase font-bold px-2 py-0.5 rounded">Zero Markup</span>}
-                          </h4>
-                          <div className="flex items-center gap-3 mt-1.5 text-[12px] font-medium text-gray-400">
-                            <span className="flex items-center gap-1"><span className="text-gray-500">Rate:</span> {fx.rate.toFixed(2)}</span>
-                            <span className="text-white/10">•</span>
-                            <span className="flex items-center gap-1"><span className="text-gray-500">Markup:</span> {fx.markup}%</span>
-                            <span className="text-white/10">•</span>
-                            <span className="flex items-center gap-1"><span className="text-gray-500">Fee:</span> ₹{fx.fee}</span>
-                          </div>
-                        </div>
-                      </div>
+                      <h4 className="text-[14px] font-black text-white leading-snug mb-3">Convert INR to {toCurrency}</h4>
                       
-                      <div className="text-left sm:text-right w-full sm:w-auto border-t sm:border-0 border-white/[0.04] pt-3 sm:pt-0 mt-2 sm:mt-0">
-                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest block mb-0.5">Total Cost</span>
-                        <div className="text-xl font-black text-white leading-none">₹{fx.totalCost.toLocaleString()}</div>
-                        {fx.savings > 0 && (
-                          <div className="text-[11px] font-bold text-emerald-400 flex items-center sm:justify-end gap-1 mt-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md inline-flex w-fit sm:w-auto">
-                            <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3"><path d="M8 15V1M3 6l5-5 5 5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                            Save ₹{fx.savings.toLocaleString()}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1.5">You Send (INR)</label>
+                          <div className="relative">
+                            <span className="absolute left-3.5 top-2.5 text-sm font-bold text-gray-400">₹</span>
+                            <input 
+                              type="number" 
+                              className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-7 py-2 text-sm text-white font-bold focus:ring-cyan-500 focus:border-cyan-500" 
+                              value={calcAmount}
+                              onChange={(e) => setCalcAmount(Math.max(0, parseInt(e.target.value) || 0))}
+                            />
                           </div>
-                        )}
+                        </div>
+                        
+                        <div>
+                          <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1.5">Live Forex Standard</label>
+                          <div className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl">
+                            <span className="text-xs font-bold text-gray-300">Market Mid-Rate</span>
+                            <span className="text-sm font-extrabold text-cyan-400">
+                              ₹1 = {(1 / (forexRates[0]?.rate || 1)).toFixed(4)} {toCurrency}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
+
+                    <div className="mt-4 pt-4 border-t border-white/[0.04] text-[11px] text-gray-500 leading-relaxed">
+                      💡 Real-time rate comparisons include estimated markups and transfer fees dynamically.
+                    </div>
                   </div>
-                ))}
+
+                  {/* Cash vs Card Split Strategy */}
+                  <div className="bg-[#0b0b10] border border-white/[0.06] rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[15px]">📊</span>
+                        <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 font-bold">Cash vs Card Split Guide</span>
+                      </div>
+                      <h4 className="text-[14px] font-black text-white leading-snug mb-2">Recommended Currency Setup</h4>
+
+                      <div className="space-y-3 mt-4">
+                        <div>
+                          <div className="flex justify-between text-[11.5px] font-bold text-gray-300 mb-1">
+                            <span>Forex Cards & Cards</span>
+                            <span className="text-emerald-400">
+                              {trip.destination.toLowerCase().includes("tokyo") || trip.destination.toLowerCase().includes("japan") ? "60%" : trip.destination.toLowerCase().includes("paris") || trip.destination.toLowerCase().includes("france") ? "95%" : "80%"}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-white/[0.04] rounded-full overflow-hidden">
+                            <div className="h-full bg-emerald-500 rounded-full" style={{ width: trip.destination.toLowerCase().includes("tokyo") || trip.destination.toLowerCase().includes("japan") ? "60%" : trip.destination.toLowerCase().includes("paris") || trip.destination.toLowerCase().includes("france") ? "95%" : "80%" }}></div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-[11.5px] font-bold text-gray-300 mb-1">
+                            <span>Physical Currency (Cash)</span>
+                            <span className="text-amber-400">
+                              {trip.destination.toLowerCase().includes("tokyo") || trip.destination.toLowerCase().includes("japan") ? "40%" : trip.destination.toLowerCase().includes("paris") || trip.destination.toLowerCase().includes("france") ? "5%" : "20%"}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-white/[0.04] rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-500 rounded-full" style={{ width: trip.destination.toLowerCase().includes("tokyo") || trip.destination.toLowerCase().includes("japan") ? "40%" : trip.destination.toLowerCase().includes("paris") || trip.destination.toLowerCase().includes("france") ? "5%" : "20%" }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-white/[0.04] text-[11.5px] text-gray-400 leading-relaxed font-medium">
+                      💡 <strong>Strategy:</strong> {trip.destination.toLowerCase().includes("tokyo") || trip.destination.toLowerCase().includes("japan") 
+                        ? "Japan is cash-heavy. Traditional cafes, temple tickets, and reloading local transport IC Cards (Suica/Pasmo) strictly require Yen notes." 
+                        : trip.destination.toLowerCase().includes("paris") || trip.destination.toLowerCase().includes("france") 
+                          ? "France is intensely digital. Contactless card payment is standard even for bakeries and public toilets. Keep minimal emergency cash." 
+                          : "Maintain a standard 80% Forex Card split for major spending, and keep 20% in physical cash for local stalls and street foods."}
+                    </div>
+                  </div>
+
+                  {/* Exchange Rate Alarm widget */}
+                  <div className="bg-[#0b0b10] border border-white/[0.06] rounded-2xl p-5 flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-[15px]">🔔</span>
+                        <span className="text-[11px] font-black uppercase tracking-widest text-purple-400 font-bold">Exchange Rate Alert Cockpit</span>
+                      </div>
+                      <h4 className="text-[14px] font-black text-white leading-snug mb-2">Automated Rate Reminders</h4>
+                      <p className="text-[11.5px] text-gray-400 leading-relaxed mt-1">Get custom notifications as soon as exchange rates improve or drop past standard mid-market margins.</p>
+                    </div>
+
+                    <button className="w-full mt-4 p-3 bg-purple-500/10 border border-purple-500/25 text-purple-300 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-purple-500/20 transition-all flex items-center justify-center gap-2 shadow-[0_0_12px_rgba(168,85,247,0.05)]">
+                      <span>🔔</span> Setup Automated Rate Alert
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Providers list with Converter computations */}
+                <div className="space-y-4">
+                  {forexRates.map((fx, idx) => {
+                    const finalMarkupRate = fx.rate * (1 + fx.markup / 100);
+                    const receivedAmount = Math.max(0, (calcAmount - fx.fee) / finalMarkupRate);
+                    return (
+                      <div
+                        key={fx.provider}
+                        className={`relative overflow-hidden border rounded-2xl transition-all ${
+                          fx.recommended 
+                            ? "border-emerald-500/30 bg-gradient-to-r from-emerald-950/10 to-[#0c0c12]/80 shadow-[0_0_20px_rgba(16,185,129,0.08)]" 
+                            : "border-white/[0.05] bg-[#0c0c12]/80 hover:border-white/10 hover:shadow-sm"
+                        }`}
+                      >
+                        {fx.recommended && (
+                          <div className="absolute top-0 right-0 bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-lg shadow-[0_0_10px_rgba(16,185,129,0.4)]">
+                            Top Pick
+                          </div>
+                        )}
+                        
+                        <div className="p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black text-lg shadow-sm border ${
+                              fx.recommended 
+                                ? "bg-white/[0.02] text-emerald-400 border-emerald-500/25 shadow-[0_0_12px_rgba(16,185,129,0.15)]" 
+                                : "bg-white/[0.01] text-gray-300 border-white/[0.05]"
+                            }`}>
+                              {fx.provider.charAt(0)}
+                            </div>
+                            <div>
+                              <h4 className="text-base font-black text-white flex items-center gap-2">
+                                {fx.provider}
+                                {fx.markup === 0 && <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[9px] uppercase font-bold px-2 py-0.5 rounded">Zero Markup</span>}
+                              </h4>
+                              <div className="flex items-center gap-3 mt-1.5 text-[12px] font-medium text-gray-400">
+                                <span className="flex items-center gap-1"><span className="text-gray-500">Rate:</span> {fx.rate.toFixed(2)}</span>
+                                <span className="text-white/10">•</span>
+                                <span className="flex items-center gap-1"><span className="text-gray-500">Markup:</span> {fx.markup}%</span>
+                                <span className="text-white/10">•</span>
+                                <span className="flex items-center gap-1"><span className="text-gray-500">Fee:</span> ₹{fx.fee}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-6 text-left sm:text-right w-full sm:w-auto border-t sm:border-0 border-white/[0.04] pt-3 sm:pt-0 mt-2 sm:mt-0 justify-between sm:justify-end">
+                            <div>
+                              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest block mb-0.5">Calculated Yield</span>
+                              <div className="text-lg font-black text-emerald-400 leading-none">
+                                {receivedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {toCurrency}
+                              </div>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest block mb-0.5">Total Cost</span>
+                              <div className="text-xl font-black text-white leading-none">₹{fx.totalCost.toLocaleString()}</div>
+                              {fx.savings > 0 && (
+                                <div className="text-[11px] font-bold text-emerald-400 flex items-center sm:justify-end gap-1 mt-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-md inline-flex w-fit sm:w-auto">
+                                  <svg viewBox="0 0 16 16" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3"><path d="M8 15V1M3 6l5-5 5 5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                  Save ₹{fx.savings.toLocaleString()}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          </GlowCard>
+            </GlowCard>
+          </div>
         )}
 
         {/* CARDS TAB */}
