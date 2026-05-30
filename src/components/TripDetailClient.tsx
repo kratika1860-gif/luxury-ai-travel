@@ -102,7 +102,103 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
     setExpandedTips((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
-  const analysis = trip.aiAnalysis;
+  const rawAnalysis = trip.aiAnalysis;
+  const analysis = rawAnalysis ? { ...rawAnalysis } : null;
+  if (analysis && analysis.itinerary) {
+    const destLower = trip.destination.toLowerCase();
+    const style = trip.travelStyle;
+    
+    const tokyoDailyMeals = [
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "The Ritz-Carlton Club Lounge" : style === "budget" ? "7-Eleven Convenience Store" : "Sarutahiko Coffee Shinjuku", cost: style === "luxury" ? 3500 : style === "budget" ? 250 : 600, tip: style === "budget" ? "Try the egg salad sandwich — a cult favorite" : "Grab a pour-over coffee and fresh pastry" },
+        { meal: "Lunch", place: style === "luxury" ? "Sushi Shin (Michelin-starred)" : style === "budget" ? "Ichiran Ramen Shibuya" : "Gyukatsu Motomura", cost: style === "luxury" ? 15000 : style === "budget" ? 850 : 1800, tip: "Order via ticket vending machine; custom spice sheets available" },
+        { meal: "Dinner", place: style === "luxury" ? "New York Grill at Park Hyatt" : style === "budget" ? "Omoide Yokocho Izakayas" : "Torikizoku Yakitori", cost: style === "luxury" ? 22000 : style === "budget" ? 1200 : 3000, tip: style === "budget" ? "Cash only; seating is tight, expect a ₹300 table cover fee" : "All items on menu are flat-rate; order via tablet" }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Aman Tokyo Lounge" : style === "budget" ? "FamilyMart Bakery" : "Tsukiji Outer Market Stalls", cost: style === "luxury" ? 4200 : style === "budget" ? 220 : 800, tip: "Try hot fresh Tamagoyaki (sweet omelette) on a stick." },
+        { meal: "Lunch", place: style === "luxury" ? "Narisawa (Innovative Satoyama)" : style === "budget" ? "Harajuku Gyoza Lou" : "Kyushu Jangara Tonkotsu", cost: style === "luxury" ? 28000 : style === "budget" ? 600 : 1200, tip: "Try the garlic-rich tonkotsu soup base with soft boiled egg." },
+        { meal: "Dinner", place: style === "luxury" ? "Ryugin (Nihonryori)" : style === "budget" ? "Harmonica Yokocho Kichijoji" : "Afuri Ramen Ebisu", cost: style === "luxury" ? 35000 : style === "budget" ? 1100 : 2200, tip: "Afuri is famous for light, refreshing Yuzu Shio (Citrus Salt) Ramen." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Grand Hyatt French Kitchen" : style === "budget" ? "Lawson Station Shop" : "Blue Bottle Coffee Omotesando", cost: style === "luxury" ? 3800 : style === "budget" ? 240 : 650, tip: "Lawson's Karaage-kun fried chicken is an absolute breakfast must-try!" },
+        { meal: "Lunch", place: style === "luxury" ? "Tempura Kondo (Michelin)" : style === "budget" ? "Yoshinoya Beef Bowls" : "Maisen Tonkatsu Aoyama", cost: style === "luxury" ? 18000 : style === "budget" ? 450 : 1600, tip: "Maisen's black pork (Kurobuta) cutlets melt in your mouth." },
+        { meal: "Dinner", place: style === "luxury" ? "Joël Robuchon Ebisu" : style === "budget" ? "Golden Gai Tiny Bars" : "Shin Udon Shinjuku", cost: style === "luxury" ? 40000 : style === "budget" ? 1500 : 2500, tip: "Get the carbonara udon with thick cut bacon and tempura butter." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Mandarin Oriental Gourmet Shop" : style === "budget" ? "Mister Donut Ueno" : "築地どんぶり市場 (Tsukiji Bowl)", cost: style === "luxury" ? 3100 : style === "budget" ? 180 : 750, tip: "Try the premium glazed Pon-de-Ring donuts for an airy chewiness." },
+        { meal: "Lunch", place: style === "luxury" ? "Ginza Kojyu (Traditional Kaiseki)" : style === "budget" ? "CoCo Ichibanya Curry" : "Tempura Tsunahachi Shinjuku", cost: style === "luxury" ? 22000 : style === "budget" ? 500 : 1450, tip: "CoCo Curry allows customizing spice levels from 1 to 10; level 3 is perfect." },
+        { meal: "Dinner", place: style === "luxury" ? "L'Effervescence" : style === "budget" ? "Yurakucho Yakitori Under-tracks" : "Ebisu Yokocho Food Hall", cost: style === "luxury" ? 32000 : style === "budget" ? 1300 : 2800, tip: "Perfect historic environment under the train arches. Smoke and cold beer." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "The Peninsula Lobby Brunch" : style === "budget" ? "Daily Yamazaki Bakery" : "Onigiri Bongo Otsuka", cost: style === "luxury" ? 4500 : style === "budget" ? 200 : 500, tip: "Bongo has the biggest, fluffiest gourmet seaweed-wrapped onigiri in town." },
+        { meal: "Lunch", place: style === "luxury" ? "Ukai Toriyama (Charcoal)" : style === "budget" ? "Nakau Udon & Rice Bowls" : "Ginza Kagari Truffle Ramen", cost: style === "luxury" ? 16000 : style === "budget" ? 400 : 1500, tip: "Kagari's signature Tori Paitan (chicken broth) is rich and creamy like soup." },
+        { meal: "Dinner", place: style === "luxury" ? "Sushi Saito (Elite Omakese)" : style === "budget" ? "Shinjuku Memory Lane Izakayas" : "Toriki Yakitori (Niche Quality)", cost: style === "luxury" ? 45000 : style === "budget" ? 1200 : 3200, tip: "Enjoy charcoal-grilled chicken skewers with sweet tare glaze." }
+      ]
+    ];
+
+    const parisDailyMeals = [
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Angelina Paris" : style === "budget" ? "Du Pain et des Idées" : "Café de Flore", cost: style === "luxury" ? 2800 : style === "budget" ? 350 : 900, tip: style === "budget" ? "Get a butter croissant and café au lait to go" : "Classic spot, perfect for people watching" },
+        { meal: "Lunch", place: style === "luxury" ? "L'Ambroisie (3 Michelin stars)" : style === "budget" ? "L'As du Fallafel in Le Marais" : "Chez Gladines", cost: style === "luxury" ? 25000 : style === "budget" ? 750 : 1600, tip: style === "budget" ? "Join the takeaway queue; it's €4 cheaper than sit-down" : "Hearty Basque cuisine with giant portions" },
+        { meal: "Dinner", place: style === "luxury" ? "Le Jules Verne (Eiffel Tower)" : style === "budget" ? "Bouillon Chartier" : "Le Relais de l'Entrecôte", cost: style === "luxury" ? 35000 : style === "budget" ? 1100 : 3500, tip: style === "moderate" ? "No reservations; arrive 30 mins before opening to get in first seating" : "Historic 1896 dining room with ultra-cheap French classics" }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Ritz Paris Bar Vendôme" : style === "budget" ? "Boulangerie Utopie" : "Café Les Deux Magots", cost: style === "luxury" ? 4000 : style === "budget" ? 300 : 950, tip: "Try the black-charcoal baguette and amazing pastries at Utopie." },
+        { meal: "Lunch", place: style === "luxury" ? "Guy Savoy" : style === "budget" ? "Marché des Enfants Rouges" : "Frenchie To Go", cost: style === "luxury" ? 28000 : style === "budget" ? 800 : 1700, tip: "Gourmet street food stalls in the oldest covered market in Paris." },
+        { meal: "Dinner", place: style === "luxury" ? "Plaza Athénée Alain Ducasse" : style === "budget" ? "Bouillon Pigalle" : "Chez Janou (Provençal)", cost: style === "luxury" ? 40000 : style === "budget" ? 1200 : 3200, tip: "Janou has 80+ varieties of Pastis and an all-you-can-eat chocolate mousse!" }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Le Meurice Cédric Grolet" : style === "budget" ? "Boulangerie Poilâne" : "Hardware Société Montmartre", cost: style === "luxury" ? 5000 : style === "budget" ? 280 : 1100, tip: "Taste the world-famous hyper-realistic fruit pastries by Cédric Grolet." },
+        { meal: "Lunch", place: style === "luxury" ? "Arpège Alain Passard" : style === "budget" ? "Chez Alain Miam Miam" : "Le Comptoir de La Relais", cost: style === "luxury" ? 32000 : style === "budget" ? 700 : 1900, tip: "Try the massive, legendary toasted galettes loaded with French cheeses." },
+        { meal: "Dinner", place: style === "luxury" ? "Le Grand Véfour" : style === "budget" ? "L'Aller Retour (Steakhouse)" : "Le Bistrot Paul Bert", cost: style === "luxury" ? 26000 : style === "budget" ? 1400 : 3800, tip: "Order the classic steak au poivre; it is considered the best in Paris." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Hôtel de Crillon Buffet" : style === "budget" ? "Mamiche Bakery" : "Holybelly 5", cost: style === "luxury" ? 4500 : style === "budget" ? 260 : 1050, tip: "Mamiche's chocolate babka is fresh out of the oven and heavenly." },
+        { meal: "Lunch", place: style === "luxury" ? "Epicure at Le Bristol" : style === "budget" ? "Candelaria (Secret Tacos)" : "Septime", cost: style === "luxury" ? 35000 : style === "budget" ? 600 : 2400, tip: "Walk through the back of the taco shop to enter a vibrant speakeasy." },
+        { meal: "Dinner", place: style === "luxury" ? "Le Cinq at Four Seasons" : style === "budget" ? "Le Traiteur Marocain" : "Au Passage (Natural Wine)", cost: style === "luxury" ? 42000 : style === "budget" ? 950 : 2600, tip: "Excellent sharing plates changing nightly based on fresh market arrivals." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Café de la Paix Opera" : style === "budget" ? "Boulangerie Chambelland" : "Claus Paris", cost: style === "luxury" ? 3800 : style === "budget" ? 300 : 1200, tip: "Chambelland is the absolute gold standard for artisanal gluten-free breads." },
+        { meal: "Lunch", place: style === "luxury" ? "Kei (Japanese-French)" : style === "budget" ? "Bánh Mì Kông" : "Carette Place des Vosges", cost: style === "luxury" ? 22000 : style === "budget" ? 550 : 1500, tip: "Carette's hot chocolate is extremely thick, served with real chantilly cream." },
+        { meal: "Dinner", place: style === "luxury" ? "Pierre Gagnaire" : style === "budget" ? "Pink Mamma (Trattoria)" : "Clown Bar", cost: style === "luxury" ? 48000 : style === "budget" ? 1300 : 3400, tip: "Try the iconic duck pithivier (duck and foie gras pie) at Clown Bar." }
+      ]
+    ];
+
+    const generalDailyMeals = [
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Hotel Fine Dining Room" : style === "budget" ? "Street Side Bakery" : "Central Café", cost: style === "luxury" ? 2200 : style === "budget" ? 200 : 550, tip: "Get local traditional breakfast items for best price." },
+        { meal: "Lunch", place: style === "luxury" ? "Top-Rated City Restaurant" : style === "budget" ? "Hawker Market / Food Stalls" : "Local Bistro", cost: style === "luxury" ? 4500 : style === "budget" ? 350 : 1100, tip: "Ask for the daily lunch special (menu du jour)." },
+        { meal: "Dinner", place: style === "luxury" ? "Michelin Star / Skyline View Dining" : style === "budget" ? "Popular Night Market" : "Family-Run Eatery", cost: style === "luxury" ? 12000 : style === "budget" ? 650 : 2200, tip: "Book online in advance to secure prime window seating." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Luxury Lounge Terrace" : style === "budget" ? "Local Corner Deli" : "Artisanal Espresso Bar", cost: style === "luxury" ? 2800 : style === "budget" ? 180 : 600, tip: "Grab fresh squeezed local fruit juices and standard breakfast rolls." },
+        { meal: "Lunch", place: style === "luxury" ? "Gourmet Seafood Pavilion" : style === "budget" ? "Food Truck Square" : "Popular Al Fresco Café", cost: style === "luxury" ? 6000 : style === "budget" ? 400 : 1300, tip: "Try the signature local sandwich or wrap with handmade sauce." },
+        { meal: "Dinner", place: style === "luxury" ? "Chef's Table Experience" : style === "budget" ? "Cozy Alleyway Diner" : "Trendy Neighborhood Gastropub", cost: style === "luxury" ? 15000 : style === "budget" ? 700 : 2600, tip: "Ask the server for local craft beer or house wine pairings." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Scenic Rooftop Breakfast" : style === "budget" ? "Fresh Bakery Cart" : "Local Hipster Brunch Spot", cost: style === "luxury" ? 3200 : style === "budget" ? 150 : 700, tip: "Try the regional specialty pastry or bread straight out of the oven." },
+        { meal: "Lunch", place: style === "luxury" ? "Waterfront Panoramic Dining" : style === "budget" ? "Central Food Court" : "Charming Garden Courtyard Bistro", cost: style === "luxury" ? 5500 : style === "budget" ? 380 : 1250, tip: "Try the locally caught seasonal specialties." },
+        { meal: "Dinner", place: style === "luxury" ? "Exclusive Historic Mansion Restaurant" : style === "budget" ? "Popular Pizza & Tapas Bar" : "Highly-Reviewed Fusion Spot", cost: style === "luxury" ? 14000 : style === "budget" ? 800 : 2400, tip: "Order sharing plates to sample a variety of signature regional tastes." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Bedside Butler Service" : style === "budget" ? "Supermarket Fresh Bar" : "Local Bakery Café", cost: style === "luxury" ? 3500 : style === "budget" ? 160 : 500, tip: "Supermarket fresh bakeries offer premium items at unbeatable prices." },
+        { meal: "Lunch", place: style === "luxury" ? "Modern Experimental Gastronomy" : style === "budget" ? "Bustling Street Market" : "Casual Pub & Grill", cost: style === "luxury" ? 7000 : style === "budget" ? 300 : 1400, tip: "Street food is prepared fresh right in front of you; highly authentic." },
+        { meal: "Dinner", place: style === "luxury" ? "Private Dining Beach Club / Villa" : style === "budget" ? "Atmospheric Cellar Tavern" : "Top-Rated Traditional Bistro", cost: style === "luxury" ? 18000 : style === "budget" ? 600 : 2800, tip: "Try their signature clay-pot or wood-fired roasted specialty." }
+      ]
+    ];
+
+    const mealPool = destLower.includes("tokyo") || destLower.includes("japan")
+      ? tokyoDailyMeals
+      : destLower.includes("paris") || destLower.includes("france")
+        ? parisDailyMeals
+        : generalDailyMeals;
+
+    analysis.itinerary = analysis.itinerary.map((day, idx) => ({
+      ...day,
+      mealSuggestions: mealPool[idx % mealPool.length]
+    }));
+  }
+
   const breakdown = analysis?.costBreakdown;
   const overspend = trip.overspendRisk ?? 0;
   const predicted = trip.predictedCost ?? 0;
