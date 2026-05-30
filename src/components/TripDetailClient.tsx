@@ -36,7 +36,7 @@ interface Props {
 
 export default function TripDetailClient({ trip, toCurrency, forexRates, flightTrends, cardRecs, visaInfo }: Props) {
   const [showAddExpense, setShowAddExpense] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "itinerary" | "flights" | "hotels" | "forex" | "cards" | "visa" | "expenses">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "itinerary" | "flights" | "hotels" | "meals" | "forex" | "cards" | "visa" | "expenses">("overview");
   const [expandedTips, setExpandedTips] = useState<Record<string, boolean>>({});
   // Itinerary Accordion State: By default, only Day 1 is open
   const [openDays, setOpenDays] = useState<number[]>([1]);
@@ -147,6 +147,7 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
     { id: "itinerary", label: "Itinerary" },
     { id: "flights", label: "Flights" },
     { id: "hotels", label: "Hotels" },
+    { id: "meals", label: "Meals & Cafés" },
     { id: "visa", label: "Visa" },
     { id: "forex", label: "Forex" },
     { id: "cards", label: "Cards" },
@@ -1172,6 +1173,202 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
               )}
             </div>
           </GlowCard>
+        )}
+        {/* MEALS & CAFES TAB */}
+        {activeTab === "meals" && (
+          <div className="space-y-6">
+            {/* Header Concierge Card */}
+            <GlowCard glowColor="rgba(249,115,22,0.1)" className="p-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 pb-6 border-b border-white/[0.06]">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-orange-500/10 border border-orange-500/25 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.15)]">
+                    <span className="text-2xl">🍽️</span>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black text-white tracking-tight">Gourmet Concierge & Dining Strategy</h2>
+                    <p className="text-sm text-gray-400 mt-1">Curated local dining, street stalls, and specialty cafés tailored to your {trip.travelStyle} style</p>
+                  </div>
+                </div>
+                {(() => {
+                  let totalFoodCost = 0;
+                  let mealCount = 0;
+                  analysis?.itinerary?.forEach((day) => {
+                    day.mealSuggestions?.forEach((m) => {
+                      totalFoodCost += m.cost;
+                      mealCount++;
+                    });
+                  });
+                  return (
+                    <div className="flex gap-4">
+                      <div className="bg-white/[0.02] border border-white/10 px-4 py-3 rounded-2xl">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-0.5">Est. Food Budget</span>
+                        <span className="text-lg font-black text-orange-400">₹{totalFoodCost.toLocaleString()}</span>
+                      </div>
+                      <div className="bg-white/[0.02] border border-white/10 px-4 py-3 rounded-2xl">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-0.5">Avg. Meal Cost</span>
+                        <span className="text-lg font-black text-emerald-400">₹{mealCount > 0 ? Math.round(totalFoodCost / mealCount).toLocaleString() : "0"}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+
+              {/* Culinary Style Profiles */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-2xl hover:bg-white/[0.02] transition-all">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">☕</span>
+                    <span className="text-xs font-black uppercase tracking-wider text-orange-400">Breakfast Rituals</span>
+                  </div>
+                  <p className="text-[12.5px] text-gray-300 leading-relaxed font-medium">
+                    {trip.travelStyle === "luxury" 
+                      ? "Gourmet hotel dining rooms, private lounges, and Michelin-tier bakery tours featuring single-origin beans." 
+                      : trip.travelStyle === "moderate" 
+                        ? "Cozy independent roasteries, traditional street-market cafes, and local bakeries for fresh local eats." 
+                        : "Highly popular grab-and-go convenience stalls, local stands, and budget bakeries with delicious fresh pastries."}
+                  </p>
+                </div>
+
+                <div className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-2xl hover:bg-white/[0.02] transition-all">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">🍛</span>
+                    <span className="text-xs font-black uppercase tracking-wider text-amber-400">Lunch Expeditions</span>
+                  </div>
+                  <p className="text-[12.5px] text-gray-300 leading-relaxed font-medium">
+                    {trip.travelStyle === "luxury" 
+                      ? "Multi-course elite menus, high-floor panoramic dining, and world-renowned chef tables." 
+                      : trip.travelStyle === "moderate" 
+                        ? "Bistros loved by locals, casual garden spots, and authentic regional specialty houses." 
+                        : "Lively street markets, hawker centers, and high-turnover ramen/curry stalls where quality is high and cost is low."}
+                  </p>
+                </div>
+
+                <div className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-2xl hover:bg-white/[0.02] transition-all">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg">🍷</span>
+                    <span className="text-xs font-black uppercase tracking-wider text-rose-400">Evening Dinners</span>
+                  </div>
+                  <p className="text-[12.5px] text-gray-300 leading-relaxed font-medium">
+                    {trip.travelStyle === "luxury" 
+                      ? "Pre-booked signature pairings, omakase feasts, and elite fine dining with spectacular city views." 
+                      : trip.travelStyle === "moderate" 
+                        ? "Atmospheric neighborhood taverns, natural wine bars, and cozy family-owned bistros." 
+                        : "Atmospheric alleyways, night markets, and flat-rate izakayas or local tapas spots packed with energy."}
+                  </p>
+                </div>
+              </div>
+            </GlowCard>
+
+            {/* Daily Meals Breakdown */}
+            <div className="space-y-4">
+              {analysis?.itinerary?.map((day, dIdx) => (
+                <div key={dIdx} className="bg-white/[0.01] border border-white/[0.06] rounded-2xl p-5 hover:bg-white/[0.02] hover:border-orange-500/20 transition-all duration-300">
+                  <div className="flex justify-between items-start md:items-center flex-col md:flex-row gap-2 pb-4 border-b border-white/[0.04] mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="px-3 py-1 bg-orange-500/10 border border-orange-500/20 text-orange-400 rounded-xl text-xs font-black uppercase tracking-widest">
+                        Day {day.day}
+                      </div>
+                      <h3 className="text-sm font-black text-white tracking-tight">{day.title}</h3>
+                    </div>
+                    {day.placesToVisit && day.placesToVisit.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {day.placesToVisit.map((p, pIdx) => (
+                          <span key={pIdx} className="text-[10px] font-bold text-gray-400 bg-white/[0.03] border border-white/[0.05] px-2 py-0.5 rounded-lg text-xs">
+                            📍 {p}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {day.mealSuggestions && day.mealSuggestions.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {day.mealSuggestions.map((meal, mIdx) => {
+                        const isBreakfast = meal.meal.toLowerCase().includes("break");
+                        const isLunch = meal.meal.toLowerCase().includes("lunch");
+                        const colorClass = isBreakfast 
+                          ? "from-orange-500/10 border-orange-500/20 text-orange-400 bg-orange-500" 
+                          : isLunch 
+                            ? "from-amber-500/10 border-amber-500/20 text-amber-400 bg-amber-500" 
+                            : "from-rose-500/10 border-rose-500/20 text-rose-400 bg-rose-500";
+                        const icon = isBreakfast ? "☕" : isLunch ? "🍛" : "🍷";
+
+                        return (
+                          <div key={mIdx} className={`bg-gradient-to-br ${colorClass.split(" ")[0]} to-[#06060a] border ${colorClass.split(" ")[1]} rounded-2xl p-4 flex flex-col justify-between h-full hover:scale-[1.01] transition-all`}>
+                            <div>
+                              <div className="flex justify-between items-center mb-3">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-sm">{icon}</span>
+                                  <span className={`text-[10px] font-black uppercase tracking-widest ${colorClass.split(" ")[2]}`}>{meal.meal}</span>
+                                </div>
+                                <span className="text-[11px] font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-lg">
+                                  ₹{meal.cost.toLocaleString()}
+                                </span>
+                              </div>
+                              <h4 className="text-[13.5px] font-bold text-white leading-snug mb-2">{meal.place}</h4>
+                            </div>
+                            <div className="bg-white/[0.01] border border-white/[0.04] p-3 rounded-xl mt-2">
+                              <p className="text-[11.5px] text-gray-400 leading-relaxed italic">
+                                <strong className="text-gray-300 not-italic">Insider Tip:</strong> {meal.tip}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-6 text-gray-500 text-xs">
+                      No culinary recommendations curated for this day.
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Dining Hacks Card */}
+            <GlowCard glowColor="rgba(168,85,247,0.1)" className="p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-lg">💡</span>
+                <h3 className="text-sm font-black uppercase tracking-widest text-purple-400">Local Dining Etiquette & Hacks</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-xl">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">Tipping Culture</span>
+                  <p className="text-[11.5px] text-gray-300 leading-relaxed font-medium">
+                    {trip.destination.toLowerCase().includes("japan") || trip.destination.toLowerCase().includes("tokyo")
+                      ? "Absolutely NO tipping in Japan. It is considered impolite. Exceptional service is built into the pricing."
+                      : trip.destination.toLowerCase().includes("paris") || trip.destination.toLowerCase().includes("france")
+                        ? "Service is included (service compris). Rounded up by 5-10% for excellent service, but not mandatory."
+                        : "Standard international norms. Check if service charge is already included in the bill."}
+                  </p>
+                </div>
+                <div className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-xl">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">Reservations</span>
+                  <p className="text-[11.5px] text-gray-300 leading-relaxed font-medium">
+                    {trip.travelStyle === "luxury"
+                      ? "Essential to book 4-8 weeks in advance for high-tier omakases and Michelin dining."
+                      : "Mid-tier spots require reservations 1-2 weeks in advance. Street stalls are walk-ins only."}
+                  </p>
+                </div>
+                <div className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-xl">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">Payment Method</span>
+                  <p className="text-[11.5px] text-gray-300 leading-relaxed font-medium">
+                    {trip.destination.toLowerCase().includes("japan")
+                      ? "Keep cash handy. High-end restaurants take cards, but many local street stands and ramen shops are cash-only."
+                      : "Credit/debit cards are widely accepted everywhere. Contactless Apple/Google Pay is highly popular."}
+                  </p>
+                </div>
+                <div className="bg-white/[0.01] border border-white/[0.04] p-4 rounded-xl">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-purple-400 block mb-1">Drinking Water</span>
+                  <p className="text-[11.5px] text-gray-300 leading-relaxed font-medium">
+                    {trip.destination.toLowerCase().includes("tokyo") || trip.destination.toLowerCase().includes("paris")
+                      ? "Tap water is 100% safe to drink and of high quality. You can ask for tap water (Carafe d'eau / O-mizu) for free."
+                      : "Stick to sealed bottled water or mineral water to prevent any travel sickness."}
+                  </p>
+                </div>
+              </div>
+            </GlowCard>
+          </div>
         )}
 
         {/* VISA TAB */}
