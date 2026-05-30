@@ -18,8 +18,13 @@ const CreateTripSchema = z.object({
 });
 
 export async function GET() {
+  console.log("GET /api/trips endpoint hit");
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  console.log("GET /api/trips session resolved:", session);
+  if (!session?.user?.id) {
+    console.log("GET /api/trips: Unauthorized - no session user id found");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const trips = await prisma.trip.findMany({
     where: { userId: session.user.id },
@@ -31,8 +36,13 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  console.log("POST /api/trips endpoint hit");
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  console.log("POST /api/trips session resolved:", session);
+  if (!session?.user?.id) {
+    console.log("POST /api/trips: Unauthorized - no session user id found");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = CreateTripSchema.safeParse(body);

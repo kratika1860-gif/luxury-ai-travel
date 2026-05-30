@@ -26,6 +26,7 @@ export default function AddExpenseModal({ tripId, onClose, onAdded }: Props) {
     try {
       const res = await fetch(`/api/trips/${tripId}/expenses`, {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,

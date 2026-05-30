@@ -1,6 +1,6 @@
 // src/app/new-trip/page.tsx
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MagneticButton } from "@/components/ui/MagneticButton";
@@ -19,6 +19,7 @@ type TravelStyle = "budget" | "moderate" | "luxury";
 
 export default function NewTripPage() {
   const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [loading, setLoading] = useState(false);
   const [origin, setOrigin] = useState("");
   const [destination, setDestination] = useState("");
@@ -30,6 +31,41 @@ export default function NewTripPage() {
   const [selectedCards, setSelectedCards] = useState<string[]>(["hdfc-infinia"]);
   const [visaRequired, setVisaRequired] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/auth/session");
+        if (!res.ok) {
+          router.push("/auth/signin");
+          return;
+        }
+        setCheckingAuth(false);
+      } catch {
+        router.push("/auth/signin");
+      }
+    }
+    checkAuth();
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen flex items-center justify-center relative overflow-hidden px-6 text-white select-none">
+        <GlowCard glowColor="rgba(59,130,246,0.2)" className="w-full max-w-sm p-10 flex flex-col items-center">
+          <div className="flex items-center gap-2 font-bold text-[20px] tracking-widest text-white group cursor-pointer mb-8">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center text-xs font-black shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+              T
+            </div>
+            <span className="bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+              TRAVIQ <span className="text-blue-500">AI</span>
+            </span>
+          </div>
+          <span className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+          <p className="text-[12px] text-gray-400 font-medium mt-4">Verifying session...</p>
+        </GlowCard>
+      </div>
+    );
+  }
 
   function toggleCard(id: string) {
     setSelectedCards((prev) =>
@@ -59,6 +95,7 @@ export default function NewTripPage() {
     try {
       const res = await fetch("/api/trips", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           origin: origin || "New Delhi, India", // fallback if somehow missed

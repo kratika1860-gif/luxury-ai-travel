@@ -138,7 +138,7 @@ Respond with exactly this JSON structure:
 Use real-world knowledge of costs in ${params.destination} for ${params.travelStyle} style travel in Indian Rupees (INR). Hidden fees should cover visa (only if Visa Required is Yes), airport taxes, city taxes, and travel insurance.`;
 
     const response = await getAnthropicClient().messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 1500,
       messages: [{ role: "user", content: prompt }],
     });
@@ -166,7 +166,7 @@ export async function getAIBudgetAdvice(params: {
 
   try {
     const response = await getAnthropicClient().messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-3-5-sonnet-20241022",
       max_tokens: 300,
       messages: [
         {
@@ -1095,81 +1095,101 @@ export async function getAITravelChatResponse(params: {
     }
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || apiKey === "your-key-here" || apiKey === "" || apiKey.includes("...")) {
-    // ═══ EXTREMELY ADVANCED OFFLINE FALLBACK PARSING ENGINE ═══
-    if (parsedAnalysis) {
-      if (msg.includes("hotel") || msg.includes("stay") || msg.includes("accommodation") || msg.includes("room")) {
-        if (parsedAnalysis.hotels && parsedAnalysis.hotels.length > 0) {
-          const hotelLines = parsedAnalysis.hotels.map((h: any, i: number) => {
-            return `🏨 **${h.name}** (${h.rating}⭐, ${h.type || "Stay"})\n*   *Cost:* ₹${h.pricePerNight.toLocaleString()}/night\n*   *Vibe:* ${h.neighborhoodVibe || "Prime local area"}\n*   *Why Book:* ${h.suitability}\n*   *Eco Badge:* ${h.sustainability || "Standard certification"}\n*   *Perks:* ${(h.benefits || h.amenities || []).join(", ")}`;
-          }).join("\n\n");
-          return `✨ **Recommended Stays for your ${params.travelStyle} trip to ${params.destination}:**\n\n${hotelLines}\n\n*Would you like me to recommend transit routes to get to any of these hotels?*`;
-        }
-      }
+  // Bilingual Input Detector
+  const isBilingual = 
+    msg.includes("sasta") || msg.includes("khana") || msg.includes("khaana") || msg.includes("batao") || 
+    msg.includes("paisa") || msg.includes("paise") || msg.includes("barish") || msg.includes("baarish") || 
+    msg.includes("mausam") || msg.includes("gaadi") || msg.includes("jaana") || msg.includes("jana") || 
+    msg.includes("safar") || msg.includes("ghoomna") || msg.includes("kya") || msg.includes("hai") ||
+    msg.includes("kaise") || msg.includes("kaha") || msg.includes("dikhana") || msg.includes("dikhao");
 
-      if (msg.includes("flight") || msg.includes("airline") || msg.includes("plane") || msg.includes("ticket") || msg.includes("luggage") || msg.includes("bag")) {
-        if (parsedAnalysis.flightStrategy) {
-          const fs = parsedAnalysis.flightStrategy;
-          return `✈️ **Sovereign Flight Strategy for your trip:**\n\n*   **Cheapest Days:** ${fs.cheapestDays}\n*   **Best Carriers:** ${(fs.bestAirlines || []).join(", ")}\n*   **Layover Secret:** ${fs.layoverTip}\n*   **Ideal Seating:** ${fs.seatRecommendation}\n*   **Baggage Alert:** ${fs.baggageWarning}\n\n*Tip: Check these details in your Flight Strategy block inside the Overview tab!*`;
-        }
-      }
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
-      if (msg.includes("price") || msg.includes("cost") || msg.includes("expensive") || msg.includes("cheap") || msg.includes("market") || msg.includes("trends")) {
-        if (parsedAnalysis.pricingIntel) {
-          const pi = parsedAnalysis.pricingIntel;
-          return `📊 **Market Pricing Intelligence for ${params.destination}:**\n\n*   **Year-over-Year:** ${pi.vsLastYear}\n*   **Booking Window:** ${pi.bookingWindow}\n*   **Alternative Option:** ${pi.alternativeDestination}\n*   **Peak Avoidance Tip:** ${pi.peakAvoidance}`;
-        }
-      }
+  // 1. NATIVE GEMINI API CLIENT (PREFER GEMINI AS STABLE FALLBACK)
+  if (geminiKey && geminiKey !== "your-key-here" && geminiKey !== "") {
+    try {
+      console.log("ChatBot: Using Native Gemini 1.5 Flash API");
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+      
+      const formattedHistory = params.history?.map(h => ({
+        role: h.role === "user" ? "user" : "model",
+        parts: [{ text: h.content }]
+      })) || [];
 
-      if (msg.includes("visa") || msg.includes("entry") || msg.includes("passport") || msg.includes("document")) {
-        return `🛂 **Official entry requirements for Indian passport holders traveling to ${params.destination}:**\n\n*   *Visa Type:* The system has mapped this as highly specific to the country's immigration regulations.\n*   *Important Tip:* Always carry a passport valid for at least 6 months, return flight tickets, hotel vouchers, and an active international credit card (like Scapia or Niyo Global).`;
-      }
+      const systemInstruction = `You are the ultimate digital luxury travel concierge embedded inside the TRAVIQ Travel OS dashboard.
+You must be fully BILINGUAL (English & Hindi/Hinglish). 
+If the user asks questions in Hindi, Hinglish (e.g. "sasta hotel kaun sa h", "weather kaisa rahega", "itinerary dikhao", "khana kaha khaye"), you MUST reply in highly polished, premium, and clear Hinglish (a beautiful mix of Hindi and English) or conversational Hindi, making them feel supported!
+If they ask in English, respond in premium English.
 
-      // Check daily itinerary details
-      if (msg.includes("itinerary") || msg.includes("day") || msg.includes("plan") || msg.includes("activity") || msg.includes("schedule")) {
-        // Try matching a day (e.g. "day 2", "day 3")
-        const match = msg.match(/day\s*(\d+)/);
-        if (match && parsedAnalysis.itinerary) {
-          const dayNum = parseInt(match[1]);
-          const dayData = parsedAnalysis.itinerary.find((d: any) => d.day === dayNum);
-          if (dayData) {
-            const activities = dayData.activities.map((a: string) => `    *   ${a}`).join("\n");
-            const meals = (dayData.mealSuggestions || []).map((m: any) => `    *   **${m.meal}:** ${m.place} (₹${m.cost.toLocaleString()}) — *${m.tip}*`).join("\n");
-            const hacks = (dayData.localHacks || []).map((h: string) => `    *   ${h}`).join("\n");
-            return `📅 **Day ${dayData.day}: ${dayData.title}**\n\n📍 **Core Activities:**\n${activities}\n\n🍽️ **Meal Concierge:**\n${meals || "    *   No specific meals logged for this day."}\n\n🎯 **Insider hacks for this day:**\n${hacks || "    *   Walk or use standard transit apps."}\n\n*Estimated daily spend: ₹${dayData.estimatedCost.toLocaleString()} INR.*`;
-          }
-        }
-      }
-    }
+Current Trip Parameters:
+- Destination: ${params.destination}
+- Travel Persona/Style: ${params.travelStyle}
+- Budget: ₹${params.budget} INR
 
-    // Default conversational fallbacks tailored to keywords
-    if (msg.includes("rain") || msg.includes("weather") || msg.includes("storm") || msg.includes("season")) {
-      return `🌧️ If you face unfavorable weather conditions in ${params.destination}, I highly recommend shifting outdoor activities to indoor museum complexes (e.g. teamLab Planets/Mori Art Museum if in Tokyo, or Centre Pompidou/Louvre if in Paris). Carry an umbrella purchased from a local convenience store (e.g., 7-Eleven or Lawson for about ¥500/€5) rather than high-priced hotel alternatives.`;
-    }
-    if (msg.includes("food") || msg.includes("eat") || msg.includes("restaurant") || msg.includes("dinner")) {
-      return `🍽️ For dining in ${params.destination} under a ${params.travelStyle} budget, explore local market alleys rather than main tourist streets. If you're in Japan, target local Izakayas, standing sushi bars, or basement food halls (depachika) in major stations around 8 PM when they slash prices by 30-50%. If in Europe, look for set lunch menus (formule midi) which save up to 40% compared to dinner.`;
-    }
-    if (msg.includes("train") || msg.includes("transit") || msg.includes("metro") || msg.includes("transport") || msg.includes("bus")) {
-      return `🚇 For transit around ${params.destination}, avoid individual single-ride tickets. Opt for localized tourist transit passes (like the Tokyo Subway 72-Hour Pass for ¥1,500, or Navigo Easy card in Paris). They cut transit overhead costs by almost 35% and offer absolute ease of use!`;
-    }
-    return `👋 Alola! I am your TRAVIQ AI Concierge. I am fully configured with your trip to **${params.destination}** at a **${params.travelStyle}** budget level of **₹${params.budget.toLocaleString()} INR**. Ask me anything about transit lines, restaurant recommendations, rainy-day alternatives, packing lists, or local hacks!`;
-  }
+Here is the exact AI Analysis, hotels, daily itinerary, and flight strategies currently displayed on the user's dashboard screen:
+${params.aiAnalysis || "No custom dashboard context loaded yet."}
 
-  try {
-    const formattedHistory = params.history?.map(h => ({
-      role: h.role === "user" ? ("user" as const) : ("assistant" as const),
-      content: h.content
-    })) || [];
+Your personality is highly efficient, sophisticated, and realistic. Use the exact hotel names, flight strategies, pricing parameters, and itineraries listed in the context above to solve the user's doubts. 
 
-    const response = await getAnthropicClient().messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 600,
-      messages: [
+If they ask about flight tickets or luggage, reference the flightStrategy and pricingIntel. 
+If they ask about hotels, compare the amenities, vibes, check-ins, or loyalty programs from the hotels list. 
+If they ask about daily schedules or dining, parse the exact day data from the itinerary block.
+
+Keep your replies structured, highly granular, clear, and actionable. Include concrete numbers or app names.`;
+
+      const contents = [
         ...formattedHistory,
         {
           role: "user",
-          content: `You are the ultimate digital luxury travel concierge embedded inside the TRAVIQ Travel OS dashboard.
+          parts: [{ text: `${systemInstruction}\n\nUser's Question: "${params.message}"` }]
+        }
+      ];
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (reply) return reply;
+      } else {
+        console.error("Gemini fetch non-ok status:", res.statusText);
+      }
+    } catch (geminiErr) {
+      console.error("Gemini API execution error:", geminiErr);
+    }
+  }
+
+  // 2. CLAUDE SONNET API CLIENT
+  if (anthropicKey && anthropicKey !== "your-key-here" && anthropicKey !== "" && !anthropicKey.includes("...")) {
+    try {
+      console.log("ChatBot: Using Claude 3.5 Sonnet API");
+      // Ensure the message sequence always starts with 'user' for Anthropic API compliance
+      let formattedHistory = params.history?.map(h => ({
+        role: h.role === "user" ? ("user" as const) : ("assistant" as const),
+        content: h.content
+      })) || [];
+
+      while (formattedHistory.length > 0 && formattedHistory[0].role === "assistant") {
+        formattedHistory.shift();
+      }
+
+      const response = await getAnthropicClient().messages.create({
+        model: "claude-3-5-sonnet-20241022",
+        max_tokens: 600,
+        messages: [
+          ...formattedHistory,
+          {
+            role: "user",
+            content: `You are the ultimate digital luxury travel concierge embedded inside the TRAVIQ Travel OS dashboard.
+You must be fully BILINGUAL (English & Hindi/Hinglish). 
+If the user asks questions in Hindi or Hinglish (e.g. "sasta hotel kaun sa h", "weather kaisa rahega", "itinerary dikhao"), you MUST reply in highly polished, premium, and clear Hinglish (a beautiful mix of Hindi and English) or conversational Hindi, making them feel supported!
+If they ask in English, respond in premium English.
+
 Current Trip Parameters:
 - Destination: ${params.destination}
 - Travel Persona/Style: ${params.travelStyle}
@@ -1187,13 +1207,143 @@ If they ask about daily schedules or dining, parse the exact day data from the i
 Keep your replies structured, highly granular, clear, and actionable. Include concrete numbers or app names.
 
 User's Question: "${params.message}"`
-        }
-      ]
-    });
-    return response.content[0].type === "text" ? response.content[0].text : "";
-  } catch (error) {
-    console.error("Chat API error:", error);
-    return `Alola! I'm here to assist you on your trip to ${params.destination}. Feel free to ask about hotels, meals, transport, or hacks!`;
+          }
+        ]
+      });
+      return response.content[0].type === "text" ? response.content[0].text : "";
+    } catch (error) {
+      console.error("Chat API error:", error);
+    }
   }
+
+  // 3. EXTREMELY SOPHISTICATED BILINGUAL OFFLINE FALLBACK PARSING ENGINE
+  console.log("ChatBot: Using Bilingual Offline Fallback Engine");
+  if (parsedAnalysis) {
+    if (msg.includes("hotel") || msg.includes("stay") || msg.includes("accommodation") || msg.includes("room") || msg.includes("resort") || msg.includes("sleep") || msg.includes("sasta hotel")) {
+      if (parsedAnalysis.hotels && parsedAnalysis.hotels.length > 0) {
+        const hotelLines = parsedAnalysis.hotels.map((h: any, i: number) => {
+          return `🏨 **${h.name}** (${h.rating}⭐, ${h.type || "Stay"})\n*   *Cost:* ₹${h.pricePerNight.toLocaleString()}/night\n*   *Vibe:* ${h.neighborhoodVibe || "Prime local area"}\n*   *Why Book:* ${h.suitability}\n*   *Eco Badge:* ${h.sustainability || "Standard certification"}\n*   *Perks:* ${(h.benefits || h.amenities || []).join(", ")}`;
+        }).join("\n\n");
+        
+        if (isBilingual) {
+          return `✨ **Aapke ${params.travelStyle} budget ke hisaab se ${params.destination} me recommended hotels ye rahe:**\n\n${hotelLines}\n\n*Kya aap inme se kisi stay ke paas transport connectivity check karna chahte hain?*`;
+        }
+        return `✨ **Recommended St Stays for your ${params.travelStyle} trip to ${params.destination}:**\n\n${hotelLines}\n\n*Would you like me to recommend transit routes to get to any of these hotels?*`;
+      }
+    }
+
+    if (msg.includes("flight") || msg.includes("airline") || msg.includes("plane") || msg.includes("ticket") || msg.includes("luggage") || msg.includes("bag") || msg.includes("fly") || msg.includes("gaadi")) {
+      if (parsedAnalysis.flightStrategy) {
+        const fs = parsedAnalysis.flightStrategy;
+        if (isBilingual) {
+          return `✈️ **Aapki Flight Booking Strategy in detail:**\n\n*   **Saste Din (Cheapest Days):** ${fs.cheapestDays}\n*   **Best Carriers (Airlines):** ${(fs.bestAirlines || []).join(", ")}\n*   **Layover Secret:** ${fs.layoverTip}\n*   **Seat Recommendation:** ${fs.seatRecommendation}\n*   **Baggage Warning:** ${fs.baggageWarning}\n\n*Insider Tip: In details ko aap Flight Strategy widget me dashboard par bhi check kar sakte hain!*`;
+        }
+        return `✈️ **Sovereign Flight Strategy for your trip:**\n\n*   **Cheapest Days:** ${fs.cheapestDays}\n*   **Best Carriers:** ${(fs.bestAirlines || []).join(", ")}\n*   **Layover Secret:** ${fs.layoverTip}\n*   **Ideal Seating:** ${fs.seatRecommendation}\n*   **Baggage Alert:** ${fs.baggageWarning}\n\n*Tip: Check these details in your Flight Strategy block inside the Overview tab!*`;
+      }
+    }
+
+    if (msg.includes("price") || msg.includes("cost") || msg.includes("expensive") || msg.includes("cheap") || msg.includes("market") || msg.includes("trends") || msg.includes("paisa") || msg.includes("paise") || msg.includes("sasta")) {
+      if (parsedAnalysis.pricingIntel) {
+        const pi = parsedAnalysis.pricingIntel;
+        if (isBilingual) {
+          return `📊 **Market Pricing aur Cost Intelligence aapke liye:**\n\n*   **Year-over-Year Comparative:** ${pi.vsLastYear}\n*   **Booking Window (Kab book karein):** ${pi.bookingWindow}\n*   **Alternate Options (Wikalp):** ${pi.alternativeDestination}\n*   **Peak Avoidance Tip:** ${pi.peakAvoidance}`;
+        }
+        return `📊 **Market Pricing Intelligence for ${params.destination}:**\n\n*   **Year-over-Year:** ${pi.vsLastYear}\n*   **Booking Window:** ${pi.bookingWindow}\n*   **Alternative Option:** ${pi.alternativeDestination}\n*   **Peak Avoidance Tip:** ${pi.peakAvoidance}`;
+      }
+    }
+
+    if (msg.includes("visa") || msg.includes("entry") || msg.includes("passport") || msg.includes("document")) {
+      if (isBilingual) {
+        return `🛂 **Indian Passport holders ke liye entry aur visa requirements:**\n\n*   *Visa Details:* Immigration regulations ke mutabik visa requirement system me dynamic mapped hai.\n*   *Important Tip:* Hamesha return tickets, hotel bookings, 6-month valid passport, aur international credit card (jaise Niyo Global ya Scapia) saath rakhein.`;
+      }
+      return `🛂 **Official entry requirements for Indian passport holders traveling to ${params.destination}:**\n\n*   *Visa Type:* The system has mapped this as highly specific to the country's immigration regulations.\n*   *Important Tip:* Always carry a passport valid for at least 6 months, return flight tickets, hotel vouchers, and an active international credit card (like Scapia or Niyo Global).`;
+    }
+
+    // Check daily itinerary details
+    if (msg.includes("itinerary") || msg.includes("day") || msg.includes("plan") || msg.includes("activity") || msg.includes("schedule") || msg.includes("ghoomna")) {
+      const match = msg.match(/day\s*(\d+)/);
+      if (match && parsedAnalysis.itinerary) {
+        const dayNum = parseInt(match[1]);
+        const dayData = parsedAnalysis.itinerary.find((d: any) => d.day === dayNum);
+        if (dayData) {
+          const activities = dayData.activities.map((a: string) => `    *   ${a}`).join("\n");
+          const meals = (dayData.mealSuggestions || []).map((m: any) => `    *   **${m.meal}:** ${m.place} (₹${m.cost.toLocaleString()}) — *${m.tip}*`).join("\n");
+          const hacks = (dayData.localHacks || []).map((h: string) => `    *   ${h}`).join("\n");
+          
+          if (isBilingual) {
+            return `📅 **Day ${dayData.day}: ${dayData.title}**\n\n📍 **Core Activities (Ghoomne ki jagah):**\n${activities}\n\n🍽️ **Meal Concierge (Khana-Pina):**\n${meals || "    *   Koi specialized meal schedule nahi hai."}\n\n🎯 **Insider Hacks (Zaroori tips):**\n${hacks || "    *   Local transport pass use karein aur walk karein."}\n\n*Estimated daily spend: ₹${dayData.estimatedCost.toLocaleString()} INR.*`;
+          }
+          return `📅 **Day ${dayData.day}: ${dayData.title}**\n\n📍 **Core Activities:**\n${activities}\n\n🍽️ **Meal Concierge:**\n${meals || "    *   No specific meals logged for this day."}\n\n🎯 **Insider hacks for this day:**\n${hacks || "    *   Walk or use standard transit apps."}\n\n*Estimated daily spend: ₹${dayData.estimatedCost.toLocaleString()} INR.*`;
+        }
+      } else if (parsedAnalysis.itinerary && parsedAnalysis.itinerary.length > 0) {
+        const overviewLines = parsedAnalysis.itinerary.map((d: any) => `*   **Day ${d.day}:** ${d.title} (Est. spend: ₹${d.estimatedCost.toLocaleString()})`).join("\n");
+        if (isBilingual) {
+          return `📅 **Aapka Day-by-Day Itinerary Highlights ${params.destination} ke liye:**\n\n${overviewLines}\n\n*Kisi specific day ki details, meals, aur hacks dekhne ke liye puchhein: "show day 2"!*`;
+        }
+        return `📅 **Your Day-by-Day Itinerary Highlights for ${params.destination}:**\n\n${overviewLines}\n\n*To view a specific day's meal guides and hacks, just ask me like: "show day 2"!*`;
+      }
+    }
+
+    // Check daily food details
+    if (msg.includes("food") || msg.includes("eat") || msg.includes("restaurant") || msg.includes("dinner") || msg.includes("lunch") || msg.includes("meal") || msg.includes("khana") || msg.includes("khaana")) {
+      if (parsedAnalysis.itinerary && parsedAnalysis.itinerary.length > 0) {
+        const mealsList: string[] = [];
+        parsedAnalysis.itinerary.forEach((d: any) => {
+          if (d.mealSuggestions) {
+            d.mealSuggestions.forEach((m: any) => {
+              mealsList.push(`*   **Day ${d.day} (${m.meal}):** ${m.place} (₹${m.cost.toLocaleString()}) — *${m.tip}*`);
+            });
+          }
+        });
+        if (mealsList.length > 0) {
+          if (isBilingual) {
+            return `🍽️ **Aapke liye curated restaurant aur dining suggestions:**\n\n${mealsList.slice(0, 8).join("\n")}\n\n*In options ko aapki yatra ke budget ke anusar perfect optimize kiya gaya hai!*`;
+          }
+          return `🍽️ **Curated Dining Guides for ${params.destination}:**\n\n${mealsList.slice(0, 8).join("\n")}\n\n*Explore these authentic options tailored specifically to your spending plan!*`;
+        }
+      }
+    }
+
+    // Check daily hacks details
+    if (msg.includes("hack") || msg.includes("secret") || msg.includes("tip") || msg.includes("save") || msg.includes("advice") || msg.includes("sasta")) {
+      if (parsedAnalysis.itinerary && parsedAnalysis.itinerary.length > 0) {
+        const hacksList: string[] = [];
+        parsedAnalysis.itinerary.forEach((d: any) => {
+          if (d.localHacks) {
+            d.localHacks.forEach((h: string) => {
+              hacksList.push(`*   **Day ${d.day}:** ${h}`);
+            });
+          }
+        });
+        if (hacksList.length > 0) {
+          if (isBilingual) {
+            return `🎯 **Hamare local travel guide ke zaroori hacks aur secrets:**\n\n${hacksList.slice(0, 8).join("\n")}\n\n*In local tips ka upyog karke aap extra tourist taxes aur high prices se bach sakte hain!*`;
+          }
+          return `🎯 **Sovereign Local Concierge Hacks for ${params.destination}:**\n\n${hacksList.slice(0, 8).join("\n")}\n\n*Use these secrets to navigate like a seasoned local and bypass high tourist markups!*`;
+        }
+      }
+    }
+  }
+
+  // Default conversational fallbacks tailored to keywords
+  if (msg.includes("rain") || msg.includes("weather") || msg.includes("storm") || msg.includes("season") || msg.includes("climate") || msg.includes("barish") || msg.includes("baarish") || msg.includes("mausam")) {
+    const weatherText = parsedAnalysis?.riskIntel?.weatherRisk || "Standard seasonal changes. Outdoor transition to indoor premium malls/museums is recommended.";
+    if (isBilingual) {
+      return `🌧️ **Baarish aur Mausam ki jankari (Risk Intel) ${params.destination} ke liye:**\n\n*   **Risk Analysis (Khatra):** ${weatherText}\n*   **Rainy-Day Plan (Back up):** Baarish hone par outdoor ghoomna cancel karke local indoor museums, digital interactive art galleries, ya luxury malls explore karein.\n*   **Insider Tip:** High-price hotel umbrellas rent karne ki jagah local convenience store (jaise 7-Eleven) se ek sasti clear umbrella le lein!`;
+    }
+    return `🌧️ **Weather Strategy & Risk Intel for ${params.destination}:**\n\n*   **Risk Assessment:** ${weatherText}\n*   **Rainy-Day Cockpit Plan:** Shift outdoor activities to premium indoor complexes (e.g. art galleries, immersive interactive digital museums, local premium shopping arcades).\n*   **Insider Tip:** Purchase a localized clear umbrella from standard convenience stores (e.g. 7-Eleven or Lawson) for a fraction of hotel umbrella rentals.`;
+  }
+  if (msg.includes("train") || msg.includes("transit") || msg.includes("metro") || msg.includes("transport") || msg.includes("bus") || msg.includes("gaadi")) {
+    if (isBilingual) {
+      return `🚇 **Transit aur transport suggestions:**\n\n*   *Local Passes:* Individual single tickets mat khareedein. Tokyo Subway 72-Hour Pass ya Navigo Easy cards jaise local unlimited passes ka upyog karein.\n*   *Savings:* Isse aapka safe aur travel transport budget up to 35% tak save ho jayega aur travel painless rahega!`;
+    }
+    return `🚇 For transit around ${params.destination}, avoid individual single-ride tickets. Opt for localized tourist transit passes (like the Tokyo Subway 72-Hour Pass for ¥1,500, or Navigo Easy card in Paris). They cut transit overhead costs by almost 35% and offer absolute ease of use!`;
+  }
+
+  if (isBilingual) {
+    return `👋 Namaste! Main aapka **TRAVIQ AI Concierge** hoon. Main aapke **${params.destination}** safar ke liye **₹${params.budget.toLocaleString()} INR** budget ke sath poori tarah ready hoon. Aap mujhse hotels, khane-pine ki jagah, local passes, baarish ke options, ya saste hacks ke baare me kuch bhi puch sakte hain!`;
+  }
+  return `👋 Alola! I am your TRAVIQ AI Concierge. I am fully configured with your trip to **${params.destination}** at a **${params.travelStyle}** budget level of **₹${params.budget.toLocaleString()} INR**. Ask me anything about transit lines, restaurant recommendations, rainy-day alternatives, packing lists, or local hacks!`;
 }
+
 
