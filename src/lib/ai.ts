@@ -783,6 +783,288 @@ function generateFallbackAnalysis(
         weatherNote: "Paris weather is unpredictable; carry a light trench coat or windbreaker."
       };
     });
+  } else if (destLower.includes("london") || destLower.includes("uk") || destLower.includes("england") || destLower.includes("united kingdom")) {
+    fallbackHotels = [
+      {
+        name: style === "budget" ? "Generator London Hostel" : style === "luxury" ? "The Savoy London" : "citizenM Tower of London",
+        pricePerNight: accommodationCostPerNight,
+        rating: style === "budget" ? "4.1/5" : style === "luxury" ? "4.9/5" : "4.5/5",
+        description: style === "budget" ? "Trendy, design-forward hostel in Bloomsbury close to Russell Square." : style === "luxury" ? "World-famous historic luxury hotel on the Strand offering unparalleled service." : "Stylish boutique hotel with spectacular views directly overlooking Tower Bridge.",
+        suitability: style === "budget" ? "Great social hub and extremely affordable." : style === "luxury" ? "Premium old-world luxury and top service." : "Superb contemporary stay with great transport links.",
+        distanceToCenter: "0.8 km",
+        amenities: ["Free Wi-Fi", style === "luxury" ? "Butler Service & Pool" : "Rooftop Bar", "24/7 Front Desk"],
+        type: style === "budget" ? "Hostel" : style === "luxury" ? "Luxury Hotel" : "Boutique Hotel",
+        benefits: ["Free Breakfast", "Prime Location"],
+        bookingPlatform: "Booking.com"
+      },
+      {
+        name: style === "budget" ? "Wombat's City Hostel" : style === "luxury" ? "The Ritz London" : "The Hoxton Shoreditch",
+        pricePerNight: Math.round(accommodationCostPerNight * 0.95),
+        rating: style === "budget" ? "4.3/5" : style === "luxury" ? "4.8/5" : "4.4/5",
+        description: style === "budget" ? "Clean, modern, highly-rated hostel near Tower Hill." : style === "luxury" ? "Neoclassical palace hotel in Piccadilly offering legendary afternoon tea." : "Industrial-chic boutique hotel famous for its vibrant lobby and dining scene.",
+        suitability: "Highly popular matching any traveler style.",
+        distanceToCenter: "1.5 km",
+        amenities: ["Free Wi-Fi", "Lobby Café", "Bar"],
+        type: style === "budget" ? "Hostel" : style === "luxury" ? "Palace Hotel" : "Design Hotel",
+        benefits: ["Free Breakfast", "Prime Location"],
+        bookingPlatform: "Booking.com"
+      }
+    ];
+
+    fallbackItinerary = Array.from({ length: duration }, (_, i) => {
+      const selectedHotel = fallbackHotels[0];
+      const hotelInfo = selectedHotel 
+        ? `${selectedHotel.name} (Located ${selectedHotel.distanceToCenter} from center. ${selectedHotel.suitability} Book via ${selectedHotel.bookingPlatform || 'Booking.com'})`
+        : "Standard London Boutique Hotel. Book via Booking.com.";
+
+      const themes = [
+        { 
+          title: "Iconic London Landmarks & Westminster Walk", 
+          activities: ["Visit Westminster Abbey — See the historic coronation church of British monarchs since 1066.", "Photograph Big Ben & Houses of Parliament — Stand on Westminster Bridge for the ultimate iconic London view.", "Ride the London Eye — Get a stunning 360-degree panoramic flight over the city from 135 meters high.", "Walk through St. James's Park — Spot the famous pelicans and walk the manicured paths leading to Buckingham Palace."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 1.0, 
+          places: ["Westminster", "London Eye"],
+          transport: [
+            "Take London Underground (Tube) to Westminster Station (₹280, 10 mins)",
+            "Explore Westminster, Big Ben, and the South Bank on foot"
+          ]
+        },
+        { 
+          title: "Royal Pageantry & Buckingham Palace Guards", 
+          activities: ["Watch Changing of the Guard at Buckingham Palace — Witness the spectacular royal military ceremony and brass bands.", "Stroll Trafalgar Square — See Nelson's Column and the massive bronze lions guarding the plaza.", "Visit the National Gallery — Explore one of the world's greatest collections of Western European paintings for free.", "Explore Covent Garden market — Enjoy world-class street performers, artisanal shops, and luxury boutiques."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 0.8, 
+          places: ["Buckingham Palace", "Covent Garden"],
+          transport: [
+            "Take Tube to Green Park Station for Buckingham Palace (₹280, 8 mins)",
+            "Walk 15 mins down the Mall through Trafalgar Square to Covent Garden"
+          ]
+        },
+        { 
+          title: "Tower of London, Tower Bridge & Borough Market", 
+          activities: ["Explore the Tower of London — See the glittering Crown Jewels, meet the ravens, and tour the historic fortress.", "Walk across Tower Bridge — Experience the spectacular Glass Floor walkway suspended high above the River Thames.", "Feast at Borough Market — Indulge in artisanal meat pies, gourmet cheeses, and world-famous street food for lunch.", "See Shakespeare's Globe — Walk past the historic open-air playhouse replica dedicated to the bard's plays."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 1.25, 
+          places: ["Tower Bridge", "Borough Market"],
+          transport: [
+            "Take Tube to Tower Hill Station (₹280, 12 mins)",
+            "Cross Tower Bridge on foot and walk along the South Bank to Borough Market"
+          ]
+        },
+        { 
+          title: "World-Class History & Soho Nightlife", 
+          activities: ["Explore the British Museum — Discover the Rosetta Stone, Parthenon Sculptures, and Egyptian mummies for free.", "Shop Oxford Street & Regent Street — Stroll the world-famous shopping avenues featuring massive flagship stores.", "Walk Soho & Piccadilly Circus — Admire the giant flashing neon screens and wander atmospheric historic alleyways.", "See a West End musical — Book tickets to see an award-winning West End theatrical performance."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 0.95, 
+          places: ["British Museum", "Soho"],
+          transport: [
+            "Take Tube to Tottenham Court Road Station for British Museum (₹280, 14 mins)",
+            "Walk 10 mins down to Soho and Regent Street on foot"
+          ]
+        }
+      ];
+
+      const theme = themes[i % themes.length];
+      return {
+        day: i + 1,
+        title: theme.title,
+        activities: theme.activities,
+        estimatedCost: Math.round(theme.cost),
+        placesToVisit: theme.places,
+        hotel: hotelInfo,
+        transport: theme.transport,
+        mealSuggestions: generalDailyMeals[i % generalDailyMeals.length],
+        localHacks: [
+          "Use a contactless bank card or phone digital wallet directly at Tube ticket barriers — no need to buy separate tickets.",
+          "Most major London museums (British Museum, National Gallery, Tate Modern) are 100% free to enter."
+        ],
+        weatherNote: "London weather changes rapidly; carry an umbrella and wear layered clothing."
+      };
+    });
+  } else if (destLower.includes("bali") || destLower.includes("indonesia")) {
+    fallbackHotels = [
+      {
+        name: style === "budget" ? "Arya Wellness Seminyak" : style === "luxury" ? "Mandapa, a Ritz-Carlton Reserve Ubud" : "The Udaya Resorts Ubud",
+        pricePerNight: accommodationCostPerNight,
+        rating: style === "budget" ? "4.5/5" : style === "luxury" ? "4.9/5" : "4.6/5",
+        description: style === "budget" ? "Chic, wellness-focused sanctuary with a rooftop yoga deck in Seminyak." : style === "luxury" ? "An ultra-luxurious, exclusive sanctuary nestled in the lush Ayung River valley of Ubud." : "Charming resort famous for its flower baths and lush jungle infinity pools.",
+        suitability: style === "budget" ? "Perfect for solo travelers and budget wellness lovers." : style === "luxury" ? "The absolute pinnacle of luxury and jungle serenity." : "Romantic and highly aesthetic mid-range stay.",
+        distanceToCenter: "1.2 km",
+        amenities: ["Free Wi-Fi", style === "luxury" ? "Private Pool & Spa" : "Outdoor Pool", "24/7 Front Desk"],
+        type: style === "budget" ? "Boutique Hostel" : style === "luxury" ? "Jungle Luxury Resort" : "Jungle Resort",
+        benefits: ["Free Breakfast", "Prime Location"],
+        bookingPlatform: "Booking.com"
+      },
+      {
+        name: style === "budget" ? "Lloyd's Inn Seminyak" : style === "luxury" ? "Bulgari Resort Bali clifftop" : "Potato Head Studios Seminyak",
+        pricePerNight: Math.round(accommodationCostPerNight * 0.95),
+        rating: style === "budget" ? "4.3/5" : style === "luxury" ? "4.9/5" : "4.5/5",
+        description: style === "budget" ? "Sleek, minimalist hotel steps away from Seminyak Beach." : style === "luxury" ? "Ultra-exclusive clifftop villa resort overlooking the Indian Ocean in Uluwatu." : "Eco-conscious contemporary beachfront resort directly integrated with Potato Head Beach Club.",
+        suitability: "Highly popular beachfront matching any style.",
+        distanceToCenter: "0.5 km",
+        amenities: ["Free Wi-Fi", "Beach Club", "Spa"],
+        type: style === "budget" ? "Design Hotel" : style === "luxury" ? "Clifftop Luxury Resort" : "Beachfront Hotel",
+        benefits: ["Free Breakfast", "Prime Location"],
+        bookingPlatform: "Booking.com"
+      }
+    ];
+
+    fallbackItinerary = Array.from({ length: duration }, (_, i) => {
+      const selectedHotel = fallbackHotels[0];
+      const hotelInfo = selectedHotel 
+        ? `${selectedHotel.name} (Located ${selectedHotel.distanceToCenter} from center. ${selectedHotel.suitability} Book via ${selectedHotel.bookingPlatform || 'Booking.com'})`
+        : "Standard Bali Resort Hotel. Book via Booking.com.";
+
+      const themes = [
+        { 
+          title: "Ubud Cultural Heart: Monkey Forest & Palace", 
+          activities: ["Explore Ubud Sacred Monkey Forest Sanctuary — Walk through an ancient jungle ravine inhabited by hundreds of playful grey macaques.", "Visit Ubud Royal Palace — Admire the beautifully preserved traditional Balinese stone carving architecture.", "Shop Ubud Art Market — Browse colorful handmade silk scarves, woven ikat fabrics, and wooden homewares.", "Walk Campuhan Ridge Walk at sunset — Trek the lush grass-covered path between two river valleys for epic sunset views."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 0.8, 
+          places: ["Ubud", "Monkey Forest"],
+          transport: [
+            "Hire a private local driver for the day (₹2,500 total, highly recommended for Bali)",
+            "Explore Ubud center and ridge walk easily on foot"
+          ]
+        },
+        { 
+          title: "Floating Temples & Tegallalang Rice Terraces", 
+          activities: ["Visit Tegallalang Rice Terraces — Photograph the spectacular tiered emerald valleys and ride the giant jungle swings.", "Tour Pura Ulun Danu Bratan — Witness the iconic, picturesque floating water temple set on a volcanic lake.", "Ritual at Pura Tirta Empul — Participate in a sacred, thousand-year-old water purification and cleansing ritual in holy spring pools."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 1.1, 
+          places: ["Tegallalang", "Lake Bratan"],
+          transport: [
+            "Private driver transfer from Ubud north to Bedugul (Included in day charter)",
+            "Walk 15 mins between tiered segments at the rice terrace valley"
+          ]
+        },
+        { 
+          title: "Dramatic Sea Temples: Tanah Lot & Uluwatu Cliff", 
+          activities: ["Visit Pura Tanah Lot — Admire the breathtaking offshore temple built on a wave-swept rock, beautiful at high tide.", "Explore clifftop Uluwatu Temple — Stand on a sheer 70-meter cliff looking down at the massive breaking surf of the Indian Ocean.", "Watch the Kecak Fire Dance — Enjoy the legendary sunset performance telling the Ramayana epic via a circle of chanting performers.", "Seafood dinner on Jimbaran Beach — Dine right on the sand with candlelit tables serving grilled fresh snapper, crab, and prawns."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 1.3, 
+          places: ["Tanah Lot", "Uluwatu"],
+          transport: [
+            "Private driver transfer down south to Uluwatu Peninsula (Included in day charter)",
+            "Walk along clifftop pathways on foot"
+          ]
+        },
+        { 
+          title: "Nusa Penida Island Paradise Exploration", 
+          activities: ["Take fast boat to Nusa Penida island — Cross the Badung strait to explore Bali's spectacular sister island.", "See Kelingking Cliff — Stand on the jaw-dropping edge overlooking the white sand T-Rex shaped beach below.", "Visit Broken Beach & Angel's Billabong — See the massive natural stone archway and crystal clear tidal infinity pool.", "Snorkel at Manta Point — Swim alongside majestic, gentle giant Manta Rays feeding in coastal currents."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 1.5, 
+          places: ["Nusa Penida", "Kelingking Beach"],
+          transport: [
+            "Take fast boat from Sanur Harbor to Nusa Penida (₹1,200 round trip, 45 mins)",
+            "Local driver hire on Nusa Penida island to navigate rough dirt roads"
+          ]
+        }
+      ];
+
+      const theme = themes[i % themes.length];
+      return {
+        day: i + 1,
+        title: theme.title,
+        activities: theme.activities,
+        estimatedCost: Math.round(theme.cost),
+        placesToVisit: theme.places,
+        hotel: hotelInfo,
+        transport: theme.transport,
+        mealSuggestions: generalDailyMeals[i % generalDailyMeals.length],
+        localHacks: [
+          "Download the Gojek or Grab app before arriving for super cheap local scooter taxi rides and food delivery.",
+          "Hire a private driver for ~₹2,500-3,500 (IDR 500,000-700,000) a day — it is the easiest, most stress-free way to explore the island."
+        ],
+        weatherNote: "Bali is tropical; carry sunscreen, mosquito repellent, and expect sudden warm rain showers."
+      };
+    });
+  } else if (destLower.includes("greece") || destLower.includes("athens") || destLower.includes("santorini") || destLower.includes("mykonos")) {
+    fallbackHotels = [
+      {
+        name: style === "budget" ? "Selina Athens Theatrou" : style === "luxury" ? "Grace Hotel Santorini (Auberge)" : "Charisma Suites Oia",
+        pricePerNight: accommodationCostPerNight,
+        rating: style === "budget" ? "4.2/5" : style === "luxury" ? "4.9/5" : "4.6/5",
+        description: style === "budget" ? "Vibrant boutique hostel in Athens with a rooftop bar looking at the Acropolis." : style === "luxury" ? "Ultra-luxury cliffside sanctuary in Imerovigli offering spectacular sunset views over the Caldera." : "Beautiful whitewashed suites in Oia featuring private plunge pools and sunset terraces.",
+        suitability: style === "budget" ? "Superb social hub for budget travelers in Plaka." : style === "luxury" ? "The absolute best luxury stay on Santorini cliff." : "Perfect cave suite stay in Oia.",
+        distanceToCenter: "0.5 km",
+        amenities: ["Free Wi-Fi", style === "luxury" ? "Caldera View Pool & Spa" : "Sunset Terrace", "24/7 Front Desk"],
+        type: style === "budget" ? "Hostel" : style === "luxury" ? "Cliffside Luxury Resort" : "Cliffside Suites",
+        benefits: ["Free Breakfast", "Prime Location"],
+        bookingPlatform: "Booking.com"
+      },
+      {
+        name: style === "budget" ? "Caveland Santorini" : style === "luxury" ? "Hotel Grande Bretagne Athens" : "Poseidon Hotel Mykonos",
+        pricePerNight: Math.round(accommodationCostPerNight * 0.95),
+        rating: style === "budget" ? "4.4/5" : style === "luxury" ? "4.9/5" : "4.5/5",
+        description: style === "budget" ? "Charming converted historic winery offering unique cave dorms and pool." : style === "luxury" ? "Historic 1874 grand hotel in Athens directly facing Syntagma Square and Parliament." : "Whitewashed boutique hotel in Mykonos Chora steps away from the windmills.",
+        suitability: "Highly popular Greek boutique hotels.",
+        distanceToCenter: "1.2 km",
+        amenities: ["Free Wi-Fi", "Pool", "Bar"],
+        type: style === "budget" ? "Cave Hostel" : style === "luxury" ? "Grand Historic Hotel" : "Boutique Hotel",
+        benefits: ["Free Breakfast", "Prime Location"],
+        bookingPlatform: "Booking.com"
+      }
+    ];
+
+    fallbackItinerary = Array.from({ length: duration }, (_, i) => {
+      const selectedHotel = fallbackHotels[0];
+      const hotelInfo = selectedHotel 
+        ? `${selectedHotel.name} (Located ${selectedHotel.distanceToCenter} from center. ${selectedHotel.suitability} Book via ${selectedHotel.bookingPlatform || 'Booking.com'})`
+        : "Standard Greek Boutique Hotel. Book via Booking.com.";
+
+      const themes = [
+        { 
+          title: "Cradle of Civilization: Athens Acropolis", 
+          activities: ["Climb Acropolis Hill — Tour the Parthenon Temple, Erechtheion, and the ancient Theater of Dionysus.", "Explore Plaka neighborhood — Walk through the oldest, most atmospheric cobblestone streets of Athens lined with taverns.", "Visit Temple of Olympian Zeus — Admire the colossal ruined columns of the once-largest temple in ancient Greece.", "Rooftop drinks in Monastiraki — Sip a local cocktail with the illuminated Acropolis glowing right in front of you."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 0.9, 
+          places: ["Athens Acropolis", "Plaka"],
+          transport: [
+            "Take Athens Metro Line 2 to Acropoli Station (₹140, 5 mins)",
+            "Explore Plaka, Monastiraki, and the historic hills on foot"
+          ]
+        },
+        { 
+          title: "Santorini Caldera & Dramatic Cliff Walk", 
+          activities: ["Ferry from Athens to Santorini — Cruise across the beautiful Aegean sea to reach the world's most dramatic volcanic island.", "Cliff Hike from Fira to Imerovigli — Walk along the spectacular, sheer volcanic cliffside pathway overlooking the blue sea.", "Watch sunset from volcanic cave bar — Recline in a whitewashed cave alcove and watch the sun dip below the volcanic caldera edge."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 1.3, 
+          places: ["Santorini Fira", "Caldera Walk"],
+          transport: [
+            "Take Blue Star Ferry or Seajets speed ferry from Piraeus Port to Santorini (₹3,500, 5 hours)",
+            "Hike along the scenic cliff path on foot"
+          ]
+        },
+        { 
+          title: "Iconic Oia Whitewashed Windmills & Blue Domes", 
+          activities: ["Wander Oia's whitewashed marble paths — Photograph the iconic blue-domed churches and stark white volcanic architecture.", "Seafood lunch at Ammoudi Bay — Walk down the 300 red-cliff steps for a fresh-grilled octopus lunch right on the water edge.", "Watch the world-famous Oia sunset — Secure a prime spot on the castle ruins to witness Santorini's legendary orange sunset.", "Fine dining cliffside experience — Splurge on a candlelit Greek dinner overlooking the glowing caldera lights below."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 1.4, 
+          places: ["Oia Santorini", "Ammoudi Bay"],
+          transport: [
+            "Take local Santorini public bus (KTEL) from Fira to Oia (₹180, 25 mins)",
+            "Climb the cliff stairs from Oia town down to Ammoudi Bay on foot"
+          ]
+        },
+        { 
+          title: "Mykonos Windmills & Little Venice Dining", 
+          activities: ["Ferry to Mykonos — Cross the Aegean to reach the cosmopolitan, vibrant island of windmills.", "Walk Mykonos Town (Chora) whitewashed maze — Explore the beautifully winding, blue-accented maze designed to confuse historic pirates.", "See Kato Mili windmills — Photograph the iconic row of 16th-century thatched windmills overlooking the harbor.", "Sunset cocktails in Little Venice — Recline al fresco right where the waves crash against the colorful balconies of captain houses."], 
+          cost: (foodCostPerDay + transportationCostPerDay + activitiesCostPerDay) * 1.25, 
+          places: ["Mykonos Town", "Little Venice"],
+          transport: [
+            "Take high-speed ferry from Santorini to Mykonos Port (₹4,500, 2 hours)",
+            "Walk through Mykonos Town easily on foot (strictly pedestrianized)"
+          ]
+        }
+      ];
+
+      const theme = themes[i % themes.length];
+      return {
+        day: i + 1,
+        title: theme.title,
+        activities: theme.activities,
+        estimatedCost: Math.round(theme.cost),
+        placesToVisit: theme.places,
+        hotel: hotelInfo,
+        transport: theme.transport,
+        mealSuggestions: generalDailyMeals[i % generalDailyMeals.length],
+        localHacks: [
+          "Book your Athens-Santorini ferry tickets online in advance via Ferryhopper; choose the morning high-speed Seajet ferry to save 3 hours.",
+          "In Santorini, use the local KTEL public buses — they are comfortable, air-conditioned coaches costing just €1.80-2.20 per ride."
+        ],
+        weatherNote: "Greece is intensely sunny in summer; pack high SPF sunscreen, sunglasses, and lightweight linen clothing."
+      };
+    });
   } else {
     fallbackHotels = [
       {

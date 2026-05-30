@@ -165,6 +165,45 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
       ]
     ];
 
+    const londonDailyMeals = [
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "The Savoy Grill" : style === "budget" ? "Regency Cafe Westminster" : "Dishoom Shoreditch", cost: style === "luxury" ? 4500 : style === "budget" ? 450 : 1200, tip: style === "budget" ? "Classic art-deco cafe; get the full English breakfast, cash only" : "Dishoom's famous bacon naan roll with hot chai is a must" },
+        { meal: "Lunch", place: style === "luxury" ? "Rules Restaurant (Est. 1798)" : style === "budget" ? "Borough Market Gourmet Stalls" : "Padella London Bridge", cost: style === "luxury" ? 8500 : style === "budget" ? 800 : 1800, tip: "Padella is famous for hand-rolled pasta; no reservations, queue starts early" },
+        { meal: "Dinner", place: style === "luxury" ? "Dinner by Heston Blumenthal" : style === "budget" ? "Flat Iron Covent Garden" : "Hawksmoor Spitalfields", cost: style === "luxury" ? 22000 : style === "budget" ? 1400 : 4500, tip: style === "budget" ? "Steak house offering premium cut with free ice cream at the end" : "Award-winning British steaks and thick-cut triple cooked chips" }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "The Wolseley Piccadilly" : style === "budget" ? "Beigel Bake Brick Lane" : "Monmouth Coffee Company", cost: style === "luxury" ? 4200 : style === "budget" ? 250 : 850, tip: "Beigel Bake serves iconic hot salt beef bagels 24/7; queue moves fast." },
+        { meal: "Lunch", place: style === "luxury" ? "Sketch Lecture Room & Library" : style === "budget" ? "Seven Dials Market Stalls" : "Dishoom Covent Garden", cost: style === "luxury" ? 18000 : style === "budget" ? 750 : 1600, tip: "Try the iconic house black daal at Dishoom — cooked for over 24 hours." },
+        { meal: "Dinner", place: style === "luxury" ? "Gordon Ramsay Bar & Grill" : style === "budget" ? "Poppie's Fish & Chips Shoreditch" : "Mildreds Soho (Vegetarian)", cost: style === "luxury" ? 18000 : style === "budget" ? 1100 : 2500, tip: "Poppie's offers the ultimate retro 1940s-themed fish & chips experience." }
+      ]
+    ];
+
+    const baliDailyMeals = [
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "The Sayan House Ubud" : style === "budget" ? "Monsieur Spoon Ubud" : "Suka Espresso", cost: style === "luxury" ? 3500 : style === "budget" ? 200 : 650, tip: "Monsieur Spoon has the flakiest, buttery croissants in Bali; sit in the garden." },
+        { meal: "Lunch", place: style === "luxury" ? "Locavore Ubud (Fine Dining)" : style === "budget" ? "Warung Makan Bu Mi" : "Naughty Nuri's Ubud", cost: style === "luxury" ? 12000 : style === "budget" ? 180 : 1200, tip: "Warung Bu Mi is a local 'nasi campur' buffet — select your dishes behind the glass." },
+        { meal: "Dinner", place: style === "luxury" ? "Sarong Seminyak" : style === "budget" ? "Jimbaran Bay Seafood Stalls" : "Bebek Bengil Ubud", cost: style === "luxury" ? 15000 : style === "budget" ? 1100 : 2800, tip: "Bebek Bengil is famous for its crispy duck served in traditional pavilions." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Acre Ubud (Jungle Cafe)" : style === "budget" ? "Sari Organik Ubud" : "Milk & Madu Canggu", cost: style === "luxury" ? 2800 : style === "budget" ? 220 : 700, tip: "Sari Organik is located in the middle of tranquil, green rice paddies." },
+        { meal: "Lunch", place: style === "luxury" ? "Merah Putih Seminyak" : style === "budget" ? "Warung Babi Guling Ibu Oka" : "Kynd Community Canggu", cost: style === "luxury" ? 8500 : style === "budget" ? 250 : 1100, tip: "Try the iconic Balinese spit-roasted suckling pig at Ibu Oka." },
+        { meal: "Dinner", place: style === "luxury" ? "Apéritif Restaurant & Bar" : style === "budget" ? "Warung Krishna Ubud" : "Mason Canggu", cost: style === "luxury" ? 18000 : style === "budget" ? 500 : 2500, tip: "Apéritif serves exceptional fine dining in a glamorous 1920s setting." }
+      ]
+    ];
+
+    const greeceDailyMeals = [
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Strofi Tavern Roof Garden" : style === "budget" ? "Ariston Bakery Athens" : "The Clumsies", cost: style === "luxury" ? 3800 : style === "budget" ? 150 : 800, tip: "Ariston has baked legendary warm puff pastry tyropita (cheese pies) since 1910." },
+        { meal: "Lunch", place: style === "luxury" ? "Kiki's Tavern Mykonos" : style === "budget" ? "Bairaktaris Monastiraki" : "To Kafeneio Athens", cost: style === "luxury" ? 11000 : style === "budget" ? 600 : 1500, tip: "Kiki's has no electricity or telephone; grilled chops and salads cooked on charcoal." },
+        { meal: "Dinner", place: style === "luxury" ? "Varoulko Seaside (Michelin)" : style === "budget" ? "O Thanasis Athens" : "Nikolas Taverna Mykonos", cost: style === "luxury" ? 18000 : style === "budget" ? 850 : 2800, tip: "O Thanasis has the absolute best beef kebab souvlaki in Athens." }
+      ],
+      [
+        { meal: "Breakfast", place: style === "luxury" ? "Grace Hotel Breakfast Terrace" : style === "budget" ? "Gregory's Bakery Fira" : "Lio Mykonos Lounge", cost: style === "luxury" ? 4500 : style === "budget" ? 220 : 900, tip: "Gregory's offers cheap, fresh spinach pies (spanakopita) and hot freddo espresso." },
+        { meal: "Lunch", place: style === "luxury" ? "Ammoudi Fish Tavern Santorini" : style === "budget" ? "Pitogyros Oia" : "Kostas Souvlaki Plaka", cost: style === "luxury" ? 9500 : style === "budget" ? 350 : 1100, tip: "Pitogyros is the absolute best place in Oia for cheap pork and chicken gyros." },
+        { meal: "Dinner", place: style === "luxury" ? "Sunset by Paraskevas Santorini" : style === "budget" ? "Monastiraki Square Taverns" : "Avra Mykonos Garden", cost: style === "luxury" ? 16000 : style === "budget" ? 900 : 3200, tip: "Dine on sun-dried, fire-grilled octopus right at the sea edge at Ammoudi." }
+      ]
+    ];
+
     const generalDailyMeals = [
       [
         { meal: "Breakfast", place: style === "luxury" ? "Hotel Fine Dining Room" : style === "budget" ? "Street Side Bakery" : "Central Café", cost: style === "luxury" ? 2200 : style === "budget" ? 200 : 550, tip: "Get local traditional breakfast items for best price." },
@@ -188,16 +227,170 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
       ]
     ];
 
+    const londonThemes = [
+      { 
+        title: "Iconic London Landmarks & Westminster Walk", 
+        activities: ["Visit Westminster Abbey — See the historic coronation church of British monarchs since 1066.", "Photograph Big Ben & Houses of Parliament — Stand on Westminster Bridge for the ultimate iconic London view.", "Ride the London Eye — Get a stunning 360-degree panoramic flight over the city from 135 meters high.", "Walk through St. James's Park — Spot the famous pelicans and walk the manicured paths leading to Buckingham Palace."], 
+        places: ["Westminster", "London Eye"],
+        transport: [
+          "Take London Underground (Tube) to Westminster Station (₹280, 10 mins)",
+          "Explore Westminster, Big Ben, and the South Bank on foot"
+        ]
+      },
+      { 
+        title: "Royal Pageantry & Buckingham Palace Guards", 
+        activities: ["Watch Changing of the Guard at Buckingham Palace — Witness the spectacular royal military ceremony and brass bands.", "Stroll Trafalgar Square — See Nelson's Column and the massive bronze lions guarding the plaza.", "Visit the National Gallery — Explore one of the world's greatest collections of Western European paintings for free.", "Explore Covent Garden market — Enjoy world-class street performers, artisanal shops, and luxury boutiques."], 
+        places: ["Buckingham Palace", "Covent Garden"],
+        transport: [
+          "Take Tube to Green Park Station for Buckingham Palace (₹280, 8 mins)",
+          "Walk 15 mins down the Mall through Trafalgar Square to Covent Garden"
+        ]
+      },
+      { 
+        title: "Tower of London, Tower Bridge & Borough Market", 
+        activities: ["Explore the Tower of London — See the glittering Crown Jewels, meet the ravens, and tour the historic fortress.", "Walk across Tower Bridge — Experience the spectacular Glass Floor walkway suspended high above the River Thames.", "Feast at Borough Market — Indulge in artisanal meat pies, gourmet cheeses, and world-famous street food for lunch.", "See Shakespeare's Globe — Walk past the historic open-air playhouse replica dedicated to the bard's plays."], 
+        places: ["Tower Bridge", "Borough Market"],
+        transport: [
+          "Take Tube to Tower Hill Station (₹280, 12 mins)",
+          "Cross Tower Bridge on foot and walk along the South Bank to Borough Market"
+        ]
+      },
+      { 
+        title: "World-Class History & Soho Nightlife", 
+        activities: ["Explore the British Museum — Discover the Rosetta Stone, Parthenon Sculptures, and Egyptian mummies for free.", "Shop Oxford Street & Regent Street — Stroll the world-famous shopping avenues featuring massive flagship stores.", "Walk Soho & Piccadilly Circus — Admire the giant flashing neon screens and wander atmospheric historic alleyways.", "See a West End musical — Book tickets to see an award-winning West End theatrical performance."], 
+        places: ["British Museum", "Soho"],
+        transport: [
+          "Take Tube to Tottenham Court Road Station for British Museum (₹280, 14 mins)",
+          "Walk 10 mins down to Soho and Regent Street on foot"
+        ]
+      }
+    ];
+
+    const baliThemes = [
+      { 
+        title: "Ubud Cultural Heart: Monkey Forest & Palace", 
+        activities: ["Explore Ubud Sacred Monkey Forest Sanctuary — Walk through an ancient jungle ravine inhabited by hundreds of playful grey macaques.", "Visit Ubud Royal Palace — Admire the beautifully preserved traditional Balinese stone carving architecture.", "Shop Ubud Art Market — Browse colorful handmade silk scarves, woven ikat fabrics, and wooden homewares.", "Walk Campuhan Ridge Walk at sunset — Trek the lush grass-covered path between two river valleys for epic sunset views."], 
+        places: ["Ubud", "Monkey Forest"],
+        transport: [
+          "Hire a private local driver for the day (₹2,500 total, highly recommended for Bali)",
+          "Explore Ubud center and ridge walk easily on foot"
+        ]
+      },
+      { 
+        title: "Floating Temples & Tegallalang Rice Terraces", 
+        activities: ["Visit Tegallalang Rice Terraces — Photograph the spectacular tiered emerald valleys and ride the giant jungle swings.", "Tour Pura Ulun Danu Bratan — Witness the iconic, picturesque floating water temple set on a volcanic lake.", "Ritual at Pura Tirta Empul — Participate in a sacred, thousand-year-old water purification and cleansing ritual in holy spring pools."], 
+        places: ["Tegallalang", "Lake Bratan"],
+        transport: [
+          "Private driver transfer from Ubud north to Bedugul (Included in day charter)",
+          "Walk 15 mins between tiered segments at the rice terrace valley"
+        ]
+      },
+      { 
+        title: "Dramatic Sea Temples: Tanah Lot & Uluwatu Cliff", 
+        activities: ["Visit Pura Tanah Lot — Admire the breathtaking offshore temple built on a wave-swept rock, beautiful at high tide.", "Explore clifftop Uluwatu Temple — Stand on a sheer 70-meter cliff looking down at the massive breaking surf of the Indian Ocean.", "Watch the Kecak Fire Dance — Enjoy the legendary sunset performance telling the Ramayana epic via a circle of chanting performers.", "Seafood dinner on Jimbaran Beach — Dine right on the sand with candlelit tables serving grilled fresh snapper, crab, and prawns."], 
+        places: ["Tanah Lot", "Uluwatu"],
+        transport: [
+          "Private driver transfer down south to Uluwatu Peninsula (Included in day charter)",
+          "Walk along clifftop pathways on foot"
+        ]
+      },
+      { 
+        title: "Nusa Penida Island Paradise Exploration", 
+        activities: ["Take fast boat to Nusa Penida island — Cross the Badung strait to explore Bali's spectacular sister island.", "See Kelingking Cliff — Stand on the jaw-dropping edge overlooking the white sand T-Rex shaped beach below.", "Visit Broken Beach & Angel's Billabong — See the massive natural stone archway and crystal clear tidal infinity pool.", "Snorkel at Manta Point — Swim alongside majestic, gentle giant Manta Rays feeding in coastal currents."], 
+        places: ["Nusa Penida", "Kelingking Beach"],
+        transport: [
+          "Take fast boat from Sanur Harbor to Nusa Penida (₹1,200 round trip, 45 mins)",
+          "Local driver hire on Nusa Penida island to navigate rough dirt roads"
+        ]
+      }
+    ];
+
+    const greeceThemes = [
+      { 
+        title: "Cradle of Civilization: Athens Acropolis", 
+        activities: ["Climb Acropolis Hill — Tour the Parthenon Temple, Erechtheion, and the ancient Theater of Dionysus.", "Explore Plaka neighborhood — Walk through the oldest, most atmospheric cobblestone streets of Athens lined with taverns.", "Visit Temple of Olympian Zeus — Admire the colossal ruined columns of the once-largest temple in ancient Greece.", "Rooftop drinks in Monastiraki — Sip a local cocktail with the illuminated Acropolis glowing right in front of you."], 
+        places: ["Athens Acropolis", "Plaka"],
+        transport: [
+          "Take Athens Metro Line 2 to Acropoli Station (₹140, 5 mins)",
+          "Explore Plaka, Monastiraki, and the historic hills on foot"
+        ]
+      },
+      { 
+        title: "Santorini Caldera & Dramatic Cliff Walk", 
+        activities: ["Ferry from Athens to Santorini — Cruise across the beautiful Aegean sea to reach the world's most dramatic volcanic island.", "Cliff Hike from Fira to Imerovigli — Walk along the spectacular, sheer volcanic cliffside pathway overlooking the blue sea.", "Watch sunset from volcanic cave bar — Recline in a whitewashed cave alcove and watch the sun dip below the volcanic caldera edge."], 
+        places: ["Santorini Fira", "Caldera Walk"],
+        transport: [
+          "Take Blue Star Ferry or Seajets speed ferry from Piraeus Port to Santorini (₹3,500, 5 hours)",
+          "Hike along the scenic cliff path on foot"
+        ]
+      },
+      { 
+        title: "Iconic Oia Whitewashed Windmills & Blue Domes", 
+        activities: ["Wander Oia's whitewashed marble paths — Photograph the iconic blue-domed churches and stark white volcanic architecture.", "Seafood lunch at Ammoudi Bay — Walk down the 300 red-cliff steps for a fresh-grilled octopus lunch right on the water edge.", "Watch the world-famous Oia sunset — Secure a prime spot on the castle ruins to witness Santorini's legendary orange sunset.", "Fine dining cliffside experience — Splurge on a candlelit Greek dinner overlooking the glowing caldera lights below."], 
+        places: ["Oia Santorini", "Ammoudi Bay"],
+        transport: [
+          "Take local Santorini public bus (KTEL) from Fira to Oia (₹180, 25 mins)",
+          "Climb the cliff stairs from Oia town down to Ammoudi Bay on foot"
+        ]
+      },
+      { 
+        title: "Mykonos Windmills & Little Venice Dining", 
+        activities: ["Ferry to Mykonos — Cross the Aegean to reach the cosmopolitan, vibrant island of windmills.", "Walk Mykonos Town (Chora) whitewashed maze — Explore the beautifully winding, blue-accented maze designed to confuse historic pirates.", "See Kato Mili windmills — Photograph the iconic row of 16th-century thatched windmills overlooking the harbor.", "Sunset cocktails in Little Venice — Recline al fresco right where the waves crash against the colorful balconies of captain houses."], 
+        places: ["Mykonos Town", "Little Venice"],
+        transport: [
+          "Take high-speed ferry from Santorini to Mykonos Port (₹4,500, 2 hours)",
+          "Walk through Mykonos Town easily on foot (strictly pedestrianized)"
+        ]
+      }
+    ];
+
     const mealPool = destLower.includes("tokyo") || destLower.includes("japan")
       ? tokyoDailyMeals
       : destLower.includes("paris") || destLower.includes("france")
         ? parisDailyMeals
-        : generalDailyMeals;
+        : destLower.includes("london") || destLower.includes("uk") || destLower.includes("england") || destLower.includes("united kingdom")
+          ? londonDailyMeals
+          : destLower.includes("bali") || destLower.includes("indonesia")
+            ? baliDailyMeals
+            : destLower.includes("greece") || destLower.includes("athens") || destLower.includes("santorini") || destLower.includes("mykonos")
+              ? greeceDailyMeals
+              : generalDailyMeals;
 
-    analysis.itinerary = analysis.itinerary.map((day, idx) => ({
-      ...day,
-      mealSuggestions: mealPool[idx % mealPool.length]
-    }));
+    analysis.itinerary = analysis.itinerary.map((day, idx) => {
+      const updatedDay = { ...day };
+      
+      // Override/Upgrade generic fallbacks with top famous landmarks if destination matches
+      if (destLower.includes("london") || destLower.includes("uk") || destLower.includes("england") || destLower.includes("united kingdom")) {
+        const theme = londonThemes[idx % londonThemes.length];
+        if (theme) {
+          updatedDay.title = theme.title;
+          updatedDay.activities = theme.activities;
+          updatedDay.placesToVisit = theme.places;
+          updatedDay.transport = theme.transport;
+        }
+      } else if (destLower.includes("bali") || destLower.includes("indonesia")) {
+        const theme = baliThemes[idx % baliThemes.length];
+        if (theme) {
+          updatedDay.title = theme.title;
+          updatedDay.activities = theme.activities;
+          updatedDay.placesToVisit = theme.places;
+          updatedDay.transport = theme.transport;
+        }
+      } else if (destLower.includes("greece") || destLower.includes("athens") || destLower.includes("santorini") || destLower.includes("mykonos")) {
+        const theme = greeceThemes[idx % greeceThemes.length];
+        if (theme) {
+          updatedDay.title = theme.title;
+          updatedDay.activities = theme.activities;
+          updatedDay.placesToVisit = theme.places;
+          updatedDay.transport = theme.transport;
+        }
+      }
+
+      return {
+        ...updatedDay,
+        mealSuggestions: mealPool[idx % mealPool.length]
+      };
+    });
   }
 
   const breakdown = analysis?.costBreakdown;
