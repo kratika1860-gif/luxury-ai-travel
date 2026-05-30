@@ -19,6 +19,7 @@ import type { VisaInfo } from "@/lib/visa";
 import AddExpenseModal from "./AddExpenseModal";
 import WikipediaImage from "./WikipediaImage";
 import { GlowCard } from "@/components/ui/GlowCard";
+import { generateDetailedFlights, generatePricePredictionChart } from "@/lib/flightsData";
 import { AnimatedCounter } from "@/components/ui/AnimatedCounter";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 
@@ -35,7 +36,7 @@ interface Props {
 
 export default function TripDetailClient({ trip, toCurrency, forexRates, flightTrends, cardRecs, visaInfo }: Props) {
   const [showAddExpense, setShowAddExpense] = useState(false);
-  const [activeTab, setActiveTab] = useState<"overview" | "itinerary" | "hotels" | "forex" | "cards" | "visa" | "expenses">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "itinerary" | "flights" | "hotels" | "forex" | "cards" | "visa" | "expenses">("overview");
   const [expandedTips, setExpandedTips] = useState<Record<string, boolean>>({});
   // Itinerary Accordion State: By default, only Day 1 is open
   const [openDays, setOpenDays] = useState<number[]>([1]);
@@ -144,6 +145,7 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
   const tabs = [
     { id: "overview", label: "Overview" },
     { id: "itinerary", label: "Itinerary" },
+    { id: "flights", label: "Flights" },
     { id: "hotels", label: "Hotels" },
     { id: "visa", label: "Visa" },
     { id: "forex", label: "Forex" },
@@ -793,6 +795,203 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
                 <p className="text-sm text-gray-400">We couldn't generate an itinerary for this trip.</p>
               </GlowCard>
             )}
+          </div>
+        )}
+
+        {/* FLIGHTS TAB */}
+        {activeTab === "flights" && (
+          <div className="space-y-6">
+            {/* Header */}
+            <GlowCard glowColor="rgba(59,130,246,0.15)" className="p-6">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+                    ✈️ Flight Command Cockpit
+                  </h2>
+                  <p className="text-sm text-gray-400 mt-1">
+                    AI-optimized schedules, cabin tiers, and pricing intelligence customized for your trip from <strong>{trip.origin}</strong> to <strong>{trip.destination}</strong>.
+                  </p>
+                </div>
+                <div className="bg-blue-500/10 border border-blue-500/20 px-4 py-2 rounded-xl text-xs text-blue-400 font-bold uppercase tracking-wider">
+                  Style: {trip.travelStyle}
+                </div>
+              </div>
+            </GlowCard>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Flight List (Col-span 2) */}
+              {(() => {
+                const detailedFlights = generateDetailedFlights(trip.origin, trip.destination, trip.startDate, trip.travelStyle);
+                return (
+                  <>
+                    <div className="lg:col-span-2 space-y-4">
+                      <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest pl-1">
+                        Custom Flight Options For Your Plan ({new Date(trip.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })})
+                      </div>
+
+                      {detailedFlights.map((flight) => (
+                        <GlowCard key={flight.id} glowColor="rgba(59,130,246,0.1)" className="p-5 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-black/40 border-white/[0.05]">
+                          {/* Airline & Info */}
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/10 flex items-center justify-center font-black text-xs text-blue-400 tracking-wider">
+                              {flight.logo}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-bold text-[15px] text-white">{flight.carrier}</h3>
+                                <span className="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded-full text-gray-400 font-medium">
+                                  {flight.flightNo}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-gray-400 mt-0.5 font-medium font-semibold">Class: <span className="text-blue-400 font-black">{flight.cabinClass}</span></p>
+                            </div>
+                          </div>
+
+                          {/* Schedule */}
+                          <div className="flex items-center gap-6 w-full md:w-auto justify-between md:justify-start">
+                            <div className="text-left">
+                              <div className="text-sm font-bold text-white">{flight.departureTime.split(" ")[0]}</div>
+                              <div className="text-[10px] text-gray-500 font-semibold">{trip.origin.split(",")[0]}</div>
+                            </div>
+                            
+                            <div className="flex flex-col items-center min-w-[80px]">
+                              <span className="text-[9px] text-gray-500 uppercase tracking-wider font-bold">{flight.duration}</span>
+                              <div className="w-16 h-0.5 bg-white/10 my-1 relative flex items-center justify-center">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 absolute"></div>
+                              </div>
+                              <span className="text-[9px] text-gray-400 font-semibold">{flight.stopDetails}</span>
+                            </div>
+
+                            <div className="text-right">
+                              <div className="text-sm font-bold text-white">{flight.arrivalTime.split(" ")[0]}</div>
+                              <div className="text-[10px] text-gray-500 font-semibold">{trip.destination.split(",")[0]}</div>
+                            </div>
+                          </div>
+
+                          {/* Fare & CTA */}
+                          <div className="flex items-center md:items-end justify-between md:justify-start md:flex-col gap-4 w-full md:w-auto pt-4 md:pt-0 border-t border-white/5 md:border-none">
+                            <div className="text-left md:text-right">
+                              <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold block">Cabin Fare</span>
+                              <div className="text-xl font-black text-white mt-0.5">
+                                ₹{flight.price.toLocaleString("en-IN")}
+                              </div>
+                              <span className="text-[9.5px] text-emerald-400 font-semibold block mt-0.5">
+                                💼 {flight.baggage}
+                              </span>
+                            </div>
+
+                            <MagneticButton 
+                              onClick={() => alert(`Redirecting to secure airline portal for ${flight.carrier} ${flight.flightNo}...`)}
+                              variant="primary" 
+                              size="sm"
+                            >
+                              Book Flight
+                            </MagneticButton>
+                          </div>
+                        </GlowCard>
+                      ))}
+
+                      {/* Cabin Benefits */}
+                      <GlowCard glowColor="rgba(16,185,129,0.1)" className="p-5 bg-gradient-to-br from-emerald-950/10 to-transparent border-emerald-500/10">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 block mb-2 pl-0.5">👑 Premium Cabin Inclusions</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-gray-300">
+                          {detailedFlights[0]?.benefits.map((b, i) => (
+                            <div key={i} className="flex items-center gap-2">
+                              <span className="text-emerald-400">✦</span>
+                              <span className="font-semibold">{b}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </GlowCard>
+                    </div>
+
+                    {/* Pricing Intelligence Widget */}
+                    <div className="space-y-6">
+                      <div className="text-[11px] font-bold text-gray-500 uppercase tracking-widest pl-1">
+                        Pricing Intelligence Center
+                      </div>
+
+                      <GlowCard glowColor="rgba(6,182,212,0.15)" className="p-5 flex flex-col justify-between">
+                        <div>
+                          <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest block mb-1">Live Price Prediction</span>
+                          <h3 className="text-sm font-black text-white">Interactive Booking Curve</h3>
+                          <p className="text-[10.5px] text-gray-400 leading-relaxed mt-1 mb-6">
+                            AI analyzes seasonal demand patterns to forecast booking spikes leading to your travel date:
+                          </p>
+                        </div>
+
+                        {/* Neon Area Chart */}
+                        <div className="relative w-full h-[180px] bg-black/20 border border-white/[0.05] rounded-xl p-3 flex flex-col justify-between mb-4">
+                          {/* SVG Curve */}
+                          <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="absolute inset-0 w-full h-full p-2">
+                            <defs>
+                              <linearGradient id="cyan-gradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="rgba(6,182,212,0.4)" />
+                                <stop offset="100%" stopColor="rgba(6,182,212,0.0)" />
+                              </linearGradient>
+                            </defs>
+                            {/* Grid Lines */}
+                            <line x1="0" y1="10" x2="100" y2="10" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+                            <line x1="0" y1="25" x2="100" y2="25" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+                            <line x1="0" y1="40" x2="100" y2="40" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+
+                            {/* Area Fill */}
+                            <path d="M 0 45 L 12.5 44 L 25 42 L 37.5 40 L 50 36 L 62.5 30 L 75 22 L 87.5 12 L 100 6 L 100 50 L 0 50 Z" fill="url(#cyan-gradient)" />
+                            {/* Glowing Line */}
+                            <path d="M 0 45 L 12.5 44 L 25 42 L 37.5 40 L 50 36 L 62.5 30 L 75 22 L 87.5 12 L 100 6" fill="none" stroke="rgba(6,182,212,1)" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+
+                          {/* Chart overlay details */}
+                          <div className="flex justify-between text-[8px] text-gray-500 font-bold uppercase relative z-10">
+                            <span>₹{(detailedFlights[0]?.price * 0.8).toFixed(0)}</span>
+                            <span>₹{(detailedFlights[0]?.price * 3.5).toFixed(0)}</span>
+                          </div>
+
+                          <div className="flex justify-between text-[8.5px] text-gray-400 font-bold uppercase tracking-wider relative z-10 pt-28">
+                            <span>Day -60</span>
+                            <span>Day -30</span>
+                            <span>Day -7</span>
+                            <span className="text-cyan-400 animate-pulse font-black">Departure</span>
+                          </div>
+                        </div>
+
+                        {/* Recommendation block */}
+                        <div className="bg-cyan-500/5 border border-cyan-500/20 rounded-xl p-3 text-[11px] leading-relaxed text-cyan-300">
+                          💡 <strong>AI Forecast:</strong> Booking right now (approx. 30-45 days before departure) saves an average of <strong>22%</strong> compared to booking within 7 days. Rates will spike in {new Date(new Date(trip.startDate).getTime() - 14 * 86400000).toLocaleDateString("en-US", { month: "short", day: "numeric" })}.
+                        </div>
+                      </GlowCard>
+
+                      {/* Additional Pricing Insights */}
+                      <GlowCard glowColor="rgba(168,85,247,0.1)" className="p-5 space-y-4">
+                        <span className="text-[10px] font-bold text-purple-400 uppercase tracking-widest block pl-0.5">Custom Price Hacks</span>
+                        
+                        {/* Secondary Airport */}
+                        <div className="flex items-start gap-3">
+                          <span className="text-purple-400 text-sm mt-0.5">✈️</span>
+                          <div>
+                            <h4 className="text-xs font-black text-white">Alternate Departure Savings</h4>
+                            <p className="text-[10.5px] text-gray-400 leading-normal mt-0.5">
+                              Flying into nearby secondary hubs saves up to 30% on accommodation and direct connection markups.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Peak Avoidance */}
+                        <div className="flex items-start gap-3">
+                          <span className="text-purple-400 text-sm mt-0.5">📅</span>
+                          <div>
+                            <h4 className="text-xs font-black text-white">Mid-Week Departure Discount</h4>
+                            <p className="text-[10.5px] text-gray-400 leading-normal mt-0.5">
+                              Adjusting departure date to Tuesday/Wednesday cuts average tickets by ₹4,200 INR per traveler.
+                            </p>
+                          </div>
+                        </div>
+                      </GlowCard>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
         )}
 
