@@ -489,7 +489,7 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
         </div>
 
         {/* Top Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <GlowCard glowColor="rgba(59,130,246,0.15)" className="p-6 relative overflow-hidden flex flex-col justify-between h-[120px]">
             <div className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Total Budget</div>
             <div className="text-3xl font-black tracking-tight text-white mt-2">
@@ -526,6 +526,34 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
               </div>
             </div>
             <div className="absolute -bottom-4 -right-4 text-7xl opacity-[0.05] select-none">⚠️</div>
+          </GlowCard>
+
+          {/* Money Saved Hero Card (The Ultimate Investor Metric) */}
+          <GlowCard 
+            glowColor="rgba(16,185,129,0.3)" 
+            className="p-6 relative overflow-hidden flex flex-col justify-between h-[120px] bg-gradient-to-br from-emerald-950/25 to-green-950/10 border border-emerald-500/30 text-emerald-400 group cursor-help"
+          >
+            <div className="text-[11px] font-bold uppercase tracking-widest opacity-80 flex items-center gap-1.5">
+              <span>🌟</span> Net Money Saved
+            </div>
+            <div className="flex justify-between items-end mt-2">
+              <div>
+                <div className="text-3xl font-black tracking-tight text-white">
+                  <AnimatedCounter value={Math.round((trip.predictedCost ?? trip.budget) * 0.0725)} format="currency" />
+                </div>
+                <div className="text-[9px] text-emerald-300/80 font-bold block mt-0.5">
+                  Saved with Traviq Zero-Markup
+                </div>
+              </div>
+            </div>
+            {/* Popover Breakdown on Hover */}
+            <div className="absolute inset-0 bg-[#07070a]/95 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center p-3 text-[10px] space-y-1">
+              <div className="font-black text-gray-400 uppercase tracking-widest border-b border-white/[0.06] pb-1 mb-1">Savings Audit</div>
+              <div className="flex justify-between text-gray-300"><span>Spend without Traviq:</span> <span>₹{Math.round((trip.predictedCost ?? trip.budget) * 1.0725).toLocaleString()}</span></div>
+              <div className="flex justify-between text-cyan-400"><span>Spend with Traviq:</span> <span>₹{Math.round(trip.predictedCost ?? trip.budget).toLocaleString()}</span></div>
+              <div className="flex justify-between text-emerald-400 font-bold border-t border-white/[0.04] pt-1"><span>Net Savings:</span> <span>₹{Math.round((trip.predictedCost ?? trip.budget) * 0.0725).toLocaleString()}</span></div>
+            </div>
+            <div className="absolute -bottom-4 -right-4 text-7xl opacity-[0.05] select-none">📈</div>
           </GlowCard>
         </div>
 
@@ -1934,7 +1962,7 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
                           <div className="flex justify-between items-center text-xs">
                             <span className="text-gray-400 font-medium">Standard Bank Card (3.5% fee):</span>
                             <span className="text-gray-300 font-extrabold">
-                              {Math.max(0, Math.round(((calcAmount - 200) / ((forexRates[0]?.rate || 1) * 1.035)))).toLocaleString()} {toCurrency}
+                              {Math.max(0, Math.round(((calcAmount - (calcAmount > 0 ? 200 : 0)) * (forexRates[0]?.rate || 0.0119) / 1.035))).toLocaleString()} {toCurrency}
                             </span>
                           </div>
 
@@ -1942,7 +1970,7 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
                             <span className="text-cyan-300 font-medium">Traviq Platinum (0% fee):</span>
                             <span className="text-white font-extrabold flex items-center gap-1">
                               <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping"></span>
-                              {Math.max(0, Math.round((calcAmount / (forexRates[0]?.rate || 1)))).toLocaleString()} {toCurrency}
+                              {Math.max(0, Math.round((calcAmount * (forexRates[0]?.rate || 0.0119)))).toLocaleString()} {toCurrency}
                             </span>
                           </div>
 
@@ -1957,7 +1985,7 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
                           <div className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/[0.04] rounded-xl">
                             <span className="text-xs font-bold text-gray-300">Market Mid-Rate</span>
                             <span className="text-sm font-extrabold text-cyan-400">
-                              ₹1 = {(1 / (forexRates[0]?.rate || 1)).toFixed(4)} {toCurrency}
+                              1 {toCurrency} = {(1 / (forexRates[0]?.rate || 0.0119)).toFixed(2)} INR
                             </span>
                           </div>
                         </div>
