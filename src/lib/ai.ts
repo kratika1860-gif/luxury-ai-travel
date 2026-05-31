@@ -1267,7 +1267,7 @@ function generateFallbackAnalysis(
 
   if (destLower.includes("tokyo") || destLower.includes("japan")) {
     bestBookingTime = "8-10 weeks before departure for Tokyo — June–August is peak summer season and flights fill fast";
-    forexAdvice = "Use a zero-forex card (Niyo Global or HDFC Regalia) in Japan — ATMs at 7-Eleven and Japan Post are the most reliable for INR withdrawals at fair rates.";
+    forexAdvice = "Use your zero-markup Traviq Card for card payments at major shops and hotel check-ins — ATMs at 7-Eleven and Japan Post are the most reliable for emergency Yen cash withdrawals.";
     recommendations = [
       "Book flights 8-10 weeks early — Tokyo flights from India spike 40-60% in peak summer (June-Aug) and Golden Week (late April). Early booking can save ₹10,000-20,000 per person.",
       "Get a IC Suica or Pasmo card on arrival — It covers all metro, JR, and bus rides in Tokyo and avoids per-ride ticket queues. Load ¥3,000-5,000 (~₹1,500-2,500) for a week.",
@@ -1280,7 +1280,7 @@ function generateFallbackAnalysis(
     ];
   } else if (destLower.includes("paris") || destLower.includes("france")) {
     bestBookingTime = "10-12 weeks before departure for Paris — Summer (June-Aug) is the busiest period; last-minute fares from India can exceed ₹90,000+";
-    forexAdvice = "Withdraw Euros from a Paris BNP Paribas or Société Générale ATM using your HDFC Infinia or Axis Atlas card — airport exchange desks add 8-12% markup over interbank rate.";
+    forexAdvice = "Withdraw Euros from a Paris BNP Paribas or Société Générale ATM using your Zero-Markup Traviq Card — airport exchange desks add 8-12% markup over interbank rate.";
     recommendations = [
       "Apply for Schengen visa at least 6 weeks early — France Schengen processing takes 15-20 working days. The visa fee is €80 (~₹7,200) plus VFS charges. Missing the window means your trip falls through entirely.",
       "Book Paris museums online in advance — The Louvre and Musee d'Orsay have limited same-day slots and can sell out by 9am in peak season. Booking online avoids 1-2 hour queues and sometimes saves 10-15%.",
@@ -1297,7 +1297,7 @@ function generateFallbackAnalysis(
     destLower.includes("vietnam") || destLower.includes("malaysia")
   ) {
     bestBookingTime = "6-8 weeks before departure — Southeast Asia flights from India are volatile; last-minute prices jump 30-50% especially during Indian school holidays";
-    forexAdvice = "Carry a mix of local cash and a zero-forex travel card — Street markets and tuk-tuks are cash-only, but malls and hotels prefer cards. Airport money changers in Bangkok/Bali give better rates than India.";
+    forexAdvice = "Carry a mix of local cash and your zero-markup Traviq card — Street markets and tuk-tuks are cash-only, but malls and hotels prefer cards. Airport money changers in Bangkok/Bali give better rates than India.";
     recommendations = [
       "Book accommodation with free cancellation policy — SE Asia weather and travel plans change fast. Agoda and Booking.com often have identical prices but free cancellation rooms let you adjust without penalty.",
       "Grab app (like Ola) is mandatory in Bangkok, KL, and Bali — Fixed-price metered taxis at airports cost 3-4x more than Grab. Always use Grab or Gojek for local transport to avoid tourist pricing.",
@@ -1328,7 +1328,7 @@ function generateFallbackAnalysis(
     ];
   } else {
     bestBookingTime = "8-10 weeks before departure — International fares from India are most competitive 8-10 weeks out and typically rise 20-40% in the final 2 weeks";
-    forexAdvice = "Use a zero-forex card (HDFC Infinia or Axis Atlas) for all card payments abroad — Standard credit cards add 3.5% foreign transaction fee on every purchase, which adds up to thousands on a long trip.";
+    forexAdvice = "Activate your pre-approved Traviq Zero-Markup card for all international purchases — standard credit cards add a predatory 3.5% foreign transaction fee on every swipe.";
     recommendations = [
       "Book flights 8-10 weeks in advance — International airfares from India peak in the final 14 days before departure and over Indian holidays. Booking early can save ₹8,000-20,000 per ticket vs last-minute rates.",
       "Research visa requirements at least 6 weeks before — Many countries require proof of accommodation, return tickets, and bank statements for visa approval. Starting the process late risks rejection or missing your travel window.",
