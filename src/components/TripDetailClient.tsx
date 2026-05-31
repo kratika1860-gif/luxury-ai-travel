@@ -1926,6 +1926,31 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
                             />
                           </div>
                         </div>
+
+                        {/* Traviq Fintech Savings Meter */}
+                        <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-xl space-y-2">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-cyan-400 block">Traviq Savings Simulator</span>
+                          
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-gray-400 font-medium">Standard Bank Card (3.5% fee):</span>
+                            <span className="text-gray-300 font-extrabold">
+                              {Math.max(0, Math.round(((calcAmount - 200) / ((forexRates[0]?.rate || 1) * 1.035)))).toLocaleString()} {toCurrency}
+                            </span>
+                          </div>
+
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-cyan-300 font-medium">Traviq Platinum (0% fee):</span>
+                            <span className="text-white font-extrabold flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping"></span>
+                              {Math.max(0, Math.round((calcAmount / (forexRates[0]?.rate || 1)))).toLocaleString()} {toCurrency}
+                            </span>
+                          </div>
+
+                          <div className="pt-2 border-t border-cyan-500/10 flex justify-between items-center text-xs font-black text-emerald-400">
+                            <span>Net Extra Saved:</span>
+                            <span>₹{Math.round(calcAmount * 0.035 + (calcAmount > 0 ? 200 : 0)).toLocaleString()} INR</span>
+                          </div>
+                        </div>
                         
                         <div>
                           <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1.5">Live Forex Standard</label>
