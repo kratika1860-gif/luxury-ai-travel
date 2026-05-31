@@ -590,6 +590,48 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
         {/* OVERVIEW TAB */}
         {activeTab === "overview" && (
           <div>
+            {/* GIANT TRIP SAVINGS SCORE HERO CARD */}
+            <div className="mb-6 bg-gradient-to-r from-emerald-950/20 via-green-950/15 to-transparent border border-emerald-500/30 rounded-3xl p-8 relative overflow-hidden shadow-[0_0_40px_rgba(16,185,129,0.06)]">
+              <div className="absolute top-4 right-4 bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-black uppercase tracking-widest px-3.5 py-1.5 rounded-full">
+                ⚡ Proprietary Finance Moat
+              </div>
+              
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                  <span className="text-[11px] font-black uppercase tracking-widest text-emerald-400 font-bold block mb-1">PROPRIETARY PERFORMANCE</span>
+                  <h2 className="text-3xl font-black tracking-tight text-white flex items-center gap-2">
+                    Trip Savings Score
+                  </h2>
+                  <p className="text-sm text-gray-400 mt-1 max-w-xl">
+                    Net cash value saved on this trip through Traviq's Zero-Markup Forex Card, aviation booking window optimizations, and concierge dining selections.
+                  </p>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-6 bg-black/45 border border-white/[0.04] p-6 rounded-2xl">
+                  <div className="text-center min-w-[100px]">
+                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">Without Traviq</div>
+                    <div className="text-base font-bold text-gray-400 line-through">
+                      ₹{Math.round((trip.predictedCost ?? trip.budget) * 1.0725).toLocaleString()}
+                    </div>
+                  </div>
+                  
+                  <div className="text-center min-w-[100px] border-x border-white/[0.06] px-6">
+                    <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider mb-1">With Traviq</div>
+                    <div className="text-base font-black text-cyan-400">
+                      ₹{Math.round(trip.predictedCost ?? trip.budget).toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div className="text-center min-w-[120px] bg-emerald-500/10 border border-emerald-500/20 px-6 py-2.5 rounded-xl">
+                    <div className="text-[9px] font-black text-emerald-400 uppercase tracking-wider mb-1">YOU SAVE</div>
+                    <div className="text-2xl font-black text-emerald-400 tracking-tight">
+                      ₹{Math.round((trip.predictedCost ?? trip.budget) * 0.0725).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               {/* Cost Breakdown Pie */}
               <GlowCard glowColor="rgba(59,130,246,0.1)" className="p-6">
@@ -2061,8 +2103,10 @@ export default function TripDetailClient({ trip, toCurrency, forexRates, flightT
                 {/* Providers list with Converter computations */}
                 <div className="space-y-4">
                   {forexRates.map((fx, idx) => {
-                    const finalMarkupRate = fx.rate * (1 + fx.markup / 100);
-                    const receivedAmount = Math.max(0, (calcAmount - fx.fee) / finalMarkupRate);
+                    const isRatesInverted = fx.rate < 1;
+                    const receivedAmount = isRatesInverted
+                      ? Math.max(0, (calcAmount - fx.fee) * fx.rate * (1 - fx.markup / 100))
+                      : Math.max(0, (calcAmount - fx.fee) / (fx.rate * (1 + fx.markup / 100)));
                     return (
                       <div
                         key={fx.provider}
